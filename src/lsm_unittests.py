@@ -61,7 +61,8 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.92,0.84,1.01],
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
-        price, cash_flow = jax_lsm.LSM_american(prices, option, discount_rate = 0.06)
+        jlsm = jax_lsm.JAX_LSM()
+        price, cash_flow = jlsm.LSM_american(prices, option, discount_rate = 0.06)
         self.assertEqual(cash_flow.shape, (8,4))
         #print(cash_flow)
         #print(price)
@@ -77,7 +78,9 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.92,0.84,1.01],
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
-        price, cash_flow = jax_lsm.jax_lsm(prices, option, discount_rate = 0.06)
+        jlsm = jax_lsm.JAX_LSM()
+
+        price, cash_flow = jlsm.jax_lsm(prices, option, discount_rate = 0.06)
         self.assertEqual(cash_flow.shape, (8,4))
         #print(cash_flow)
         #print(price)
@@ -101,18 +104,20 @@ class lsm_unit_tests(unittest.TestCase):
     """ def test_jax_lsm_american_time(self):
         prices = simulate_prices(n=100_000)
         option = Contract(strike=105, T=25, payoff=call_payoff)
+        jlsm = jax_lsm.JAX_LSM()
         start = time.time()
-        jax_lsm.LSM_american(prices, option, discount_rate = 0.06)
+        jlsm.LSM_american(prices, option, discount_rate = 0.06)
         end = time.time()
-        print(f'jax_lsm_american runtime: {end-start}')
+        print(f'jax_lsm_american runtime: {end-start}') """
 
     def test_jax_lsm_time(self):
-        prices = simulate_prices(n=100_000)
+        prices = simulate_prices(n=1_000)
         option = Contract(strike=105, T=25, payoff=call_payoff)
+        jlsm = jax_lsm.JAX_LSM()
         start = time.time()
-        jax_lsm.jax_lsm(prices, option, discount_rate = 0.06)
+        jlsm.jax_lsm(prices, option, discount_rate = 0.06)
         end = time.time()
-        print(f'jax_lsm runtime: {end-start}') """
+        print(f'jax_lsm runtime: {end-start}')
 
     def runTest(self):
         pass
