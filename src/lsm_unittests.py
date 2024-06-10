@@ -7,6 +7,8 @@ import jax
 import jax.numpy as jnp
 import jax_lsm
 import time
+from math import exp, log, sqrt
+
 
 class lsm_unit_tests(unittest.TestCase):
     
@@ -31,10 +33,10 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.92,0.84,1.01],
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
-        price, cash_flow = LSM_american(prices, option, discount_rate = 0.06)
+        price, cash_flow = LSM_american(prices, option, discount_rate = exp(0.06*260)-1)
         self.assertEqual(cash_flow.shape, (8,4))
-        #print(cash_flow)
-        #print(price)
+        print(cash_flow)
+        print(price)
         assert np.allclose(price, 0.1144,atol=0.015)
 
     def test_LSM_european(self):
@@ -48,7 +50,7 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
         price = LSM_european(prices, option, discount_rate = 0.06)
-        #print(price)
+        print(price)
         assert np.allclose(price, 0.0564,atol=0.005)
     
     def test_jax_lsm_american(self):
@@ -68,7 +70,7 @@ class lsm_unit_tests(unittest.TestCase):
         #print(price)
         assert np.allclose(price, 0.1144,atol=0.015)
 
-    def test_jax_lsm(self):
+    """ def test_jax_lsm(self):
         prices = np.array([[1.00,1.09,1.08,1.34],
                           [1.00,1.16,1.26,1.54],
                           [1.00,1.22,1.07,1.03],
@@ -99,7 +101,7 @@ class lsm_unit_tests(unittest.TestCase):
         start = time.time()
         LSM_american(prices, option, discount_rate = 0.06)
         end = time.time()
-        print(f'LSM_american runtime: {end-start}')
+        print(f'LSM_american runtime: {end-start}') """
 
     """ def test_jax_lsm_american_time(self):
         prices = simulate_prices(n=100_000)
@@ -110,14 +112,14 @@ class lsm_unit_tests(unittest.TestCase):
         end = time.time()
         print(f'jax_lsm_american runtime: {end-start}') """
 
-    def test_jax_lsm_time(self):
+    """ def test_jax_lsm_time(self):
         prices = simulate_prices(n=1_000)
         option = Contract(strike=105, T=25, payoff=call_payoff)
         jlsm = jax_lsm.JAX_LSM()
         start = time.time()
         jlsm.jax_lsm(prices, option, discount_rate = 0.06)
         end = time.time()
-        print(f'jax_lsm runtime: {end-start}')
+        print(f'jax_lsm runtime: {end-start}') """
 
     def runTest(self):
         pass

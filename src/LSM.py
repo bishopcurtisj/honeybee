@@ -25,7 +25,8 @@ def LSM_american(prices, option, discount_rate = 0.06):
     T = option.T
     cash_flow = np.zeros((n,T))
     discount_rate = log(1+discount_rate)/260
-
+    #260*dr = log(1+r)
+    #exp(260*dr) = 1+r
 
     for path in range(n):
         cash_flow[path,-1] = option.get_payoff(prices[path,-1])
@@ -43,9 +44,9 @@ def LSM_american(prices, option, discount_rate = 0.06):
                 payoffs[path]=payoff
                 cf = np.argmax(cash_flow[path])
                 if cf == 0:
-                    Y.append(payoff)
+                    Y.append(0)
                 else:
-                    Y.append(cash_flow[path,cf]/((1+discount_rate)**(cf-t)))
+                    Y.append(cash_flow[path,cf]*exp(-discount_rate*(cf-t)))
 
         X = [np.array([1,x,x**2]) for x in X]
       
@@ -69,7 +70,7 @@ def LSM_american(prices, option, discount_rate = 0.06):
     present_values = np.zeros(n)
     for path in range(n):
         cf = np.argmax(cash_flow[path])
-        present_values[path] = cash_flow[path,cf]/((1+discount_rate)**(cf))
+        present_values[path] = cash_flow[path,cf]*exp(-discount_rate*(cf))
     
     return np.mean(present_values), cash_flow
 
@@ -79,7 +80,7 @@ def LSM_european(prices, option, discount_rate = 0.06):
     #discount_rate = log(1+discount_rate)/260
 
     for path in range(n):
-        cash_flow[path] = option.get_payoff(prices[path,-1])/((1+discount_rate)**(option.T))
+        cash_flow[path] = option.get_payoff(prices[path,-1])*exp(-discount_rate*(option.T-1))
 
     
     return np.mean(cash_flow)    
