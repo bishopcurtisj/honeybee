@@ -10,6 +10,7 @@ import time
 from math import exp, log, sqrt
 
 
+
 class lsm_unit_tests(unittest.TestCase):
     
     def test_simulate_prices(self):

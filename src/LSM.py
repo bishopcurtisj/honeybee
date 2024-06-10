@@ -4,7 +4,6 @@ import scipy.stats as stats
 from math import exp, log, sqrt
 from contract import *
 
-
 def simulate_prices(drift=0.15,volatility=0.15, initial_price=100,T=25, n=250, distribution=np.random.normal, m=0, sd=1):
     #np.random.seed(seed)
     ## Trading days in 1 year: 260
@@ -73,6 +72,7 @@ def LSM_american(prices, option, discount_rate = 0.06):
         present_values[path] = cash_flow[path,cf]*exp(-discount_rate*(cf))
     
     return np.mean(present_values), cash_flow
+    #return present_values
 
 def LSM_european(prices, option, discount_rate = 0.06):
     n = len(prices)
