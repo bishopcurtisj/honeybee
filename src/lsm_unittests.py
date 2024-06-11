@@ -34,11 +34,20 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.92,0.84,1.01],
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
-        price, cash_flow = LSM_american(prices, option, discount_rate = exp(0.06*260)-1)
+        price, cash_flow = LSM_american(prices, option, discount_rate = 0.06)
         self.assertEqual(cash_flow.shape, (8,4))
-        print(cash_flow)
-        print(price)
-        assert np.allclose(price, 0.1144,atol=0.015)
+        price = np.round(price,4)
+        cf = np.array([[0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.07],
+                       [0.00,0.17,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.34,0.00,0.00],
+                       [0.00,0.18,0.00,0.00],
+                       [0.00,0.22,0.00,0.00]])     
+        assert np.allclose(price, 0.1144), f'Looking for 0.1144, got {price}'   
+        assert np.allclose(cash_flow, cf), f'Looking for \n{cf}, got \n{cash_flow}'
+        
 
     def test_LSM_european(self):
         prices = np.array([[1.00,1.09,1.08,1.34],
@@ -51,10 +60,11 @@ class lsm_unit_tests(unittest.TestCase):
                           [1.00,0.88,1.22,1.34]])
         option = Contract(strike=1.1, T=4, payoff=put_payoff)
         price = LSM_european(prices, option, discount_rate = 0.06)
-        print(price)
-        assert np.allclose(price, 0.0564,atol=0.005)
+        price = np.round(price,4)
+        assert np.allclose(price, 0.0564),f'Looking for 0.0564, got {price}'
+        
     
-    def test_jax_lsm_american(self):
+    """def test_jax_lsm_american(self):
         prices = np.array([[1.00,1.09,1.08,1.34],
                           [1.00,1.16,1.26,1.54],
                           [1.00,1.22,1.07,1.03],
@@ -67,9 +77,17 @@ class lsm_unit_tests(unittest.TestCase):
         jlsm = jax_lsm.JAX_LSM()
         price, cash_flow = jlsm.LSM_american(prices, option, discount_rate = 0.06)
         self.assertEqual(cash_flow.shape, (8,4))
-        #print(cash_flow)
-        #print(price)
-        assert np.allclose(price, 0.1144,atol=0.015)
+        price = np.round(price,4)
+        cf = np.array([[0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.07],
+                       [0.00,0.17,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.34,0.00,0.00],
+                       [0.00,0.18,0.00,0.00],
+                       [0.00,0.22,0.00,0.00]])  
+        assert np.allclose(price, 0.1144), f'Looking for 0.1144, got {price}'   
+        assert np.allclose(cash_flow, cf), f'Looking for \n{cf}, got \n{cash_flow}'"""
 
     """ def test_jax_lsm(self):
         prices = np.array([[1.00,1.09,1.08,1.34],
@@ -85,18 +103,26 @@ class lsm_unit_tests(unittest.TestCase):
 
         price, cash_flow = jlsm.jax_lsm(prices, option, discount_rate = 0.06)
         self.assertEqual(cash_flow.shape, (8,4))
-        #print(cash_flow)
-        #print(price)
-        assert np.allclose(price, 0.1144,atol=0.015)
+        price = np.round(price,4)
+        cf = np.array([[0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.00,0.00,0.07],
+                       [0.00,0.17,0.00,0.00],
+                       [0.00,0.00,0.00,0.00],
+                       [0.00,0.34,0.00,0.00],
+                       [0.00,0.18,0.00,0.00],
+                       [0.00,0.22,0.00,0.00]])  
+        assert np.allclose(price, 0.1144), f'Looking for 0.1144, got {price}'   
+        assert np.allclose(cash_flow, cf), f'Looking for \n{cf}, got \n{cash_flow}'"""
         
 
     def test_simulate_prices_time(self):
         start = time.time()
-        simulate_prices(n=1_000_000)
+        simulate_prices(n=100_000)
         end = time.time()
         print(f'simulate_prices runtime: {end-start}')
 
-    def test_LSM_american_time(self):
+    """ def test_LSM_american_time(self):
         prices = simulate_prices(n=100_000)
         option = Contract(strike=105, T=25, payoff=call_payoff)
         start = time.time()

@@ -4,11 +4,11 @@ import scipy.stats as stats
 from math import exp, log, sqrt
 from contract import *
 
-def simulate_prices(drift=0.15,volatility=0.15, initial_price=100,T=25, n=250, distribution=np.random.normal, m=0, sd=1):
+def simulate_prices(drift=0.15,volatility=0.15, initial_price=100,T=25,h=1.0, n=250, distribution=np.random.normal, m=0, sd=1):
     #np.random.seed(seed)
     ## Trading days in 1 year: 260
-    R=log(1+drift)/260
-    v=volatility/sqrt(260)
+    R=log(1+drift)*h
+    v=volatility*sqrt(h)
 
     assets = np.empty((n,T))
     assets[:,0] = initial_price
@@ -23,9 +23,8 @@ def LSM_american(prices, option, discount_rate = 0.06):
     n = len(prices)
     T = option.T
     cash_flow = np.zeros((n,T))
-    discount_rate = log(1+discount_rate)/260
-    #260*dr = log(1+r)
-    #exp(260*dr) = 1+r
+    discount_rate = discount_rate*option.h
+    
 
     for path in range(n):
         cash_flow[path,-1] = option.get_payoff(prices[path,-1])
@@ -51,7 +50,7 @@ def LSM_american(prices, option, discount_rate = 0.06):
       
         X = np.asarray(X)
         Y = np.asarray(Y)
-        if Y.size <=1:
+        if Y.size <2:
             ## If there is only one path, we can't calculate the betas, read paper to see if LS address this...
             break
         else:
@@ -77,7 +76,7 @@ def LSM_american(prices, option, discount_rate = 0.06):
 def LSM_european(prices, option, discount_rate = 0.06):
     n = len(prices)
     cash_flow = np.zeros(n)
-    #discount_rate = log(1+discount_rate)/260
+    discount_rate = discount_rate*option.h
 
     for path in range(n):
         cash_flow[path] = option.get_payoff(prices[path,-1])*exp(-discount_rate*(option.T-1))
