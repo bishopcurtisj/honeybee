@@ -92,9 +92,63 @@ def bsm_call(option,rfr=0.06,price=100,vol=0.15/sqrt(260),div=0):
     d2=d1-vol*np.sqrt(T)
     call = price*np.exp(-div*T)*N(d1)-strike*np.exp(-rfr*T)*N(d2)
     delta=N(d1)
-    return call,delta                
+    return call,delta   
 
+def ols(X,Y):
+    return np.matmul(np.linalg.inv(np.dot(X.T,X)), np.dot(X.T,Y)) 
 
+def ls_option(option, prices, discount_rate = 0.06, reg = ols):
+    n = len(prices)
+    T = option.T
+    cash_flow = np.zeros((n,T))
+    discount_rate = discount_rate*option.h
+    
+
+    for path in range(n):
+        cash_flow[path,-1] = option.get_payoff(prices[path,-1])
+    for t in range(T-2, 0, -1):
+        ## Get the in-the-money paths
+        X = [] 
+        Y = []
+        payoffs = {}
+        pos_cash_flows = []
+        for path in range(n):
+            payoff=option.get_payoff(prices[path,t])
+            if payoff > 0:
+                pos_cash_flows.append(path)
+                X.append(prices[path,t])
+                payoffs[path]=payoff
+                cf = np.argmax(cash_flow[path])
+                if cf == 0:
+                    Y.append(0)
+                else:
+                    Y.append(cash_flow[path,cf]*exp(-discount_rate*(cf-t)))
+
+        X = [np.array([1,x,x**2]) for x in X]
+      
+        X = np.asarray(X)
+        Y = np.asarray(Y)
+        if Y.size <2:
+            ## If there is only one path, we can't calculate the betas, read paper to see if LS address this...
+            break
+        else:
+            betas = reg(X,Y)
+    
+        p=0
+        for path in pos_cash_flows:
+            continuation = np.dot(X[p], betas)
+            p+=1
+
+            if payoffs[path] > continuation:
+                cash_flow[path,t] = payoffs[path]
+                cash_flow[path,t+1:] = 0
+
+    present_values = np.zeros(n)
+    for path in range(n):
+        cf = np.argmax(cash_flow[path])
+        present_values[path] = cash_flow[path,cf]*exp(-discount_rate*(cf))
+    
+    return np.mean(present_values), cash_flow
 
 
 
