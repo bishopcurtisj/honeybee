@@ -1,0 +1,11 @@
+{
+    "agent_type": {
+        "data_type": "string",
+        "description": "The type of agent",
+        "example": "trader",
+        "required": true,
+        "unique": true,
+        "enum": ["trader", "broker", "market_maker"]
+    }
+
+}
