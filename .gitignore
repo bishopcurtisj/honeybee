@@ -4,3 +4,5 @@ archive/
 GS_ACE/
 .venv/
 docs/.obsidian/
+src/scratch.py
+src/.ipynb_checkpoints/

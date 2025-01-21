@@ -2,6 +2,8 @@ from dataclasses import dataclass
 import jax.numpy as jnp
 from typing import Protocol
 
+from constants import *
+
 
 ## Utility function for agents to determine how much they value gains relative to risk
 class Utility(Protocol):
@@ -22,7 +24,7 @@ class Demand(Protocol):
 @dataclass(frozen=True, kw_only=True, slots=True)
 class GS_linear:
     ## If uninformed signal == price
-    def __call__(self, price: float, coeffs: jnp.ndarray, signal, scaling_factor: float) -> float:
+    def __call__(self, price: float, coeffs: jnp.ndarray, signal, scaling_factor: float = None) -> float:
         return scaling_factor * (coeffs[0] + coeffs[1] * signal - price)
 
 ## Objective function for learning algorithm to maximize

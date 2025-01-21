@@ -8,7 +8,7 @@ Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i
 ## Components
 
 **Traders** 
-- ID: int
+- ID: int -> Just use index of ndarray
 - Informed (0 | 1)
 - Learning algorithm
 	- int that is converted to function using REGISTRY
@@ -19,6 +19,7 @@ Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i
 - Demand
 - Objective Function
 	- int that is converted to function using REGISTRY
+- Fitness
 - Function parameter values
 - Signal
 - Previous Period Return
