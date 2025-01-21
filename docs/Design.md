@@ -1,4 +1,6 @@
+# Questions
 
+Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i.d 
 ## Entities
 
 - Traders
@@ -14,12 +16,14 @@
 	- int that is converted to function using REGISTRY
 - Demand Function
 	- int that is converted to function using REGISTRY
+- Demand
 - Objective Function
 	- int that is converted to function using REGISTRY
 - Function parameter values
 - Signal
 - Previous Period Return
 - Aggregate Return
+- Cost of signal
 
 **Market**
 - Price

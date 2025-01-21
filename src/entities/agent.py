@@ -21,8 +21,9 @@ class Demand(Protocol):
 
 @dataclass(frozen=True, kw_only=True, slots=True)
 class GS_linear:
-    def __call__(self, price: float, informed: int, coeffs: jnp.ndarray) -> float:
-        ...
+    ## If uninformed signal == price
+    def __call__(self, price: float, coeffs: jnp.ndarray, signal, scaling_factor: float) -> float:
+        return scaling_factor * (coeffs[0] + coeffs[1] * signal - price)
 
 ## Objective function for learning algorithm to maximize
 class Objective(Protocol):
