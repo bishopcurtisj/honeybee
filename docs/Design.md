@@ -12,7 +12,7 @@ Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i
 - Informed (0 | 1)
 - Learning algorithm
 	- int that is converted to function using REGISTRY
-- Preference relation
+- Utility Function
 	- int that is converted to function using REGISTRY
 - Demand Function
 	- int that is converted to function using REGISTRY

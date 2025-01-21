@@ -3,7 +3,7 @@ import jax.numpy as jnp
 from entities.agent import *
 from constants import *
 
-
+ 
 def calculate_fitness(agents: jnp.ndarray) -> jnp.ndarray:
     pass
 
@@ -15,3 +15,6 @@ def update_demands(price: float, agents: jnp.ndarray):
         agents[i,2] = DEMAND_REGISTRY[agents[i,3]](price, agents[i,4:], agents[i,1], GAMMA_CONSTANTS[agents[i,0]])
         
     return agents
+
+def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray) -> jnp.ndarray:
+    pass
