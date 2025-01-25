@@ -6,3 +6,7 @@ GS_ACE/
 docs/.obsidian/
 src/scratch.py
 src/.ipynb_checkpoints/
+src/__pycache__/
+src/components/__pycache__/
+src/entities/__pycache__/
+src/systems/__pycache__/

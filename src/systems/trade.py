@@ -3,8 +3,8 @@ import jax.numpy as jnp
 
 from entities.agent import *
 from constants import *
-from calculations import update_demands
-from entities.market import Market
+from systems.calculations import update_demands
+from entities.market import Market 
 
 
 # def calculate_market_price(agents: jnp.ndarray, market: Market, min_price: float = 0, max_price: float = 100) -> float:
