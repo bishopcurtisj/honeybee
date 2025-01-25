@@ -19,7 +19,7 @@ def calculate_fitness(agents: jnp.ndarray, repetitions: int, risk_aversion: jnp.
         agents[i, 0] = OBJECTIVE_REGISTRY[agents[i,1]](returns[i], risk_aversion[i])
 
     return agents
-
+ 
 ## Parallelized 1-period simultaions
 def calculate_fitness_accel(agents: jnp.ndarray, repetitions: int) -> jnp.ndarray:
     pass

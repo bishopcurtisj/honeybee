@@ -16,10 +16,21 @@ class Experiment:
         self.market = Market()
 
     def run(self, generations: int = 20, repetitions: int = 100):
-        pass
+        
+        for i in range(generations):
+            self.controller.update_agent_demand()
+            self.controller.calculate_fitness()
+            self.controller.learn()
+            self.controller.trade()
+        
+        self.save()
+        return self.agents
 
+
+    ## Need to test this to verify how write works with jnp arrays
     def save(self):
-        pass
+        with open('./assets/results.csv', 'w') as f:
+            f.write(self.agents)
 
 ## Handles the selection of subset to be sent to system
     
