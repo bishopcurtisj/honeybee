@@ -6,10 +6,9 @@ from constants import *
 from calculations import update_demands
 
 
-def calculate_market_price(agents: jnp.ndarray, supply: float, min_price: float = 0, max_price: float = 100) -> float:
+def calculate_market_price(agents: jnp.ndarray, supply: float = 0, min_price: float = 0, max_price: float = 100) -> float:
     """
     Calculate the market price of a good given a set of agents and their demands
-    This function assumes linear demand functions as seen in Routledge (1999)
 
     Args:
         agents (jnp.ndarray): Array of agents
@@ -19,6 +18,7 @@ def calculate_market_price(agents: jnp.ndarray, supply: float, min_price: float 
     Returns:
         float: Market price of a good
     """
+    
     total_demand = jnp.sum(agents[:,1])
     p = (min_price + max_price)/2
 
