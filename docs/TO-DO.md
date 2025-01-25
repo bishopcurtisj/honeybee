@@ -1,3 +1,4 @@
-- [ ] Remove all unused imports
-- [ ] Finish Experiment Driver
-- [ ] Finish Controller / Decide what to do about Controller
+- [x] Remove all unused imports
+- [ ] Finish Experiment Driver (Testing Phase)
+- [ ] Finish Controller / Decide what to do about Controller (Testing Phase)
+- [ ] Write testing script
