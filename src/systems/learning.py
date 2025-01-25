@@ -17,10 +17,13 @@ class GeneticAlgorithm:
     """
 
 
-    def __call__(self, agents: jnp.ndarray, mutation_rate: float, crossover_rate: float, pop_size: int) -> jnp.ndarray:
+    def __call__(self, agents: jnp.ndarray, parameters: jnp.ndarray, pop_size: int, informed: bool = True) -> jnp.ndarray:
         # Evaluate fitness for each individual
         total_fitness = jnp.sum(agents[:,0])
         fitnesses = agents[:,0]
+
+        crossover_rate = parameters[0]
+        mutation_rate = parameters[1]
 
         new_population = jnp.empty_like(agents)
         new_population[:,0] = agents[:,0]
@@ -40,12 +43,18 @@ class GeneticAlgorithm:
                 else:
                     # No crossover -> clone the parents
                     child1, child2 = parent1, parent2
-
-                # Mutation step: slightly perturb some offspring
-                if random.uniform(0, 1) < mutation_rate:
-                    child1[1:] += random.standard_normal(params-1)  # add small random noise
-                if random.uniform(0, 1) < mutation_rate:
-                    child2[1:] += random.standard_normal(params-1)  # add small random noise
+                
+                if informed:
+                    # Mutation step: slightly perturb some offspring
+                    if random.uniform(0, 1) < mutation_rate:
+                        child1[1:] += random.standard_normal(params-1)  # add small random noise
+                    if random.uniform(0, 1) < mutation_rate:
+                        child2[1:] += random.standard_normal(params-1)  # add small random noise
+                else:  
+                    if random.uniform(0, 1) < mutation_rate:
+                        child1 += random.standard_normal(params)  # add small random noise
+                    if random.uniform(0, 1) < mutation_rate:
+                        child2 += random.standard_normal(params)  # add small random noise
 
                 new_population[i, 1:] = child1
                 new_population[i + 1, 1:] = child2
