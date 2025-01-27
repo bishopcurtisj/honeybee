@@ -28,6 +28,7 @@ class Experiment:
 
     def run(self, generations: int = 20, repetitions: int = 100):
         
+        ## TODO: reset market each generation
         for i in range(generations):
             self.controller.update_agent_demand()
             self.controller.calculate_agent_fitness(repetitions)
