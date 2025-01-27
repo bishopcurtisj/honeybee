@@ -11,3 +11,4 @@ class Market(NamedTuple):
     y: jnp.ndarray = jnp.array(np.random.normal(0, 1, 100))
     z: jnp.ndarray = jnp.array(np.random.normal(0, 1, 100))
     dividends: jnp.ndarray = beta0 + beta1 * y + z
+    last_period_price: float = 0

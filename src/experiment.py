@@ -12,15 +12,19 @@ from systems.trade import *
 class Experiment:
     def __init__(self, agents_file_path: str = './assets/agents.csv', components_file_path: str='./assets/components.json', market: Market = None):
         self.agents, self.components = initialize(agents_file_path, components_file_path)
-        if 'informed' in self.components.keys():
-            self.informed = self.components['informed']['col_idx']
-        else:
-            self.informed = -1
-        self.controller = Controller(self)
         if market is None: 
             self.market = Market()
         else:
             self.market = market
+        if 'informed' in self.components.keys():
+            self.informed = self.components['informed']['col_idx']
+            self.agents[:, self.components['signal']['col_idx']] = jnp.where(self.agents[:, self.informed] == 0, self.market.price, self.market.y[0])
+
+        else:
+            self.informed = -1
+        self.controller = Controller(self)
+        
+
 
     def run(self, generations: int = 20, repetitions: int = 100):
         
@@ -60,6 +64,10 @@ class Controller:
         params = traders[:, self.experiment.components['learning_algorithm']['parameter_idxs']]
         subset = traders[:, columns]
         subset = GeneticAlgorithm(subset, params, len(subset), informed)
+
+        self.experiment.agents[traders][:, columns] = subset
+        self.experiment.market.last_period_price = self.experiment.market.price
+        self.experiment.agents = jnp.where(self.experiment.agents[:, self.experiment.informed]== 0, self.experiment.market.price, self.experiment.agents[:,self.experiment.components['signal']['col_idx']])
 
 
     def trade(self):
