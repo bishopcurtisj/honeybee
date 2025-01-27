@@ -1,21 +1,22 @@
-
+import json
 
 import jax.numpy as jnp
 
-from components.initializer import initialize
 from entities.market import Market
 from systems.calculations import *
 from systems.learning import *
 from systems.trade import *
 
 
+
+
 class Experiment:
-    def __init__(self, agents_file_path: str = './assets/agents.csv', components_file_path: str='./assets/components.json', market: Market = None):
-        self.agents, self.components = initialize(agents_file_path, components_file_path)
-        if market is None: 
-            self.market = Market()
-        else:
-            self.market = market
+    def __init__(self, market: Market, agents_file_path: str = './assets/agents.csv', components_file_path: str='./assets/components.json'):
+        
+        self.components = json.loads(components_file_path)
+        self.agents = jnp.loadtxt(agents_file_path, delimiter=',')
+        self.market = market
+        
         if 'informed' in self.components.keys():
             self.informed = self.components['informed']['col_idx']
             self.agents[:, self.components['signal']['col_idx']] = jnp.where(self.agents[:, self.informed] == 0, self.market.price, self.market.y[0])

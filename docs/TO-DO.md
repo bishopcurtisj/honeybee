@@ -2,3 +2,5 @@
 - [ ] Finish Experiment Driver (Testing Phase)
 - [ ] Finish Controller / Decide what to do about Controller (Testing Phase)
 - [ ] Write testing script
+- [ ] Move signal from agents ndarray to market
+- [ ] Refactor
