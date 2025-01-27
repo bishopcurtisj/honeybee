@@ -7,6 +7,9 @@ Should we use a controller to send the array slices to functions, or build the p
 How flexible should I allow the structure of agents to be?
 
 
+
+Limit order book vs Intersecting demand/supply
+
 ## Entities
 
 - Agents
