@@ -1,14 +1,15 @@
 setup.py
-components/__init__.py
-components/initializer.py
 entities/__init__.py
 entities/agent.py
 entities/market.py
 honeybee.egg-info/PKG-INFO
 honeybee.egg-info/SOURCES.txt
 honeybee.egg-info/dependency_links.txt
+honeybee.egg-info/requires.txt
 honeybee.egg-info/top_level.txt
 systems/__init__.py
 systems/calculations.py
 systems/learning.py
 systems/trade.py
+experiment.py
+constants.py

@@ -1,0 +1,22 @@
+{
+    "agent_type": {
+        "data_type": "string",
+        "description": "The type of agent",
+        "example": "trader",
+        "required": true,
+        "unique": true,
+        "enum": ["trader", "broker", "market_maker"],
+        "col_idx": 0
+    },
+    "Learning Algorithm": {
+        "data_type": "function",
+        "description": "The learning algorithm used by the agent",
+        "example": "GeneticAlgorithm",
+        "required": true,
+        "unique": false,
+        "enum": ["GeneticAlgorithm", "Q-Learning", "DeepQNetwork"],
+        "col_idx": 1,
+        "parameter_idxs": [2, 3, 4]
+    }
+
+}

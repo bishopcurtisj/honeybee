@@ -12,6 +12,7 @@
         "data_type": "int",
         "description": "The learning algorithm used by the agent",
         "example": "GeneticAlgorithm",
+        "name": "learning_algorithm",
         "required": true,
         "unique": false,
         "enum": ["GeneticAlgorithm", "Q-Learning", "DeepQNetwork"],

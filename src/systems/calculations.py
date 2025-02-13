@@ -1,13 +1,13 @@
-import jax.numpy as jnp
+import numpy as jnp
 
 from entities.agent import *
 from entities.market import Market
-from constants import *
+
+GAMMA_CONSTANTS = [1,1]
 
 
-
-
-def calculate_market_price(agents: jnp.ndarray, supply: float, start_price: float = 0, min_price: float = 0, max_price: float = 100, informed: bool = True) -> float:
+## TODO: Agent demand functions don't necessarily intersect, need to redesign.
+def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: float, start_price: float = 0, min_price: float = 0, max_price: float = 100_000, informed: bool = True) -> float:
     """
     Calculate the market price of a good given a set of agents and their demands
 
@@ -26,40 +26,73 @@ def calculate_market_price(agents: jnp.ndarray, supply: float, start_price: floa
     Returns:
         float: Market price of a good
     """
-    
-    total_demand = jnp.sum(agents[:,1])
+
+    if maximum_supply < supply:
+        supply = maximum_supply
+
+
     if start_price == 0:
         p = (min_price + max_price)/2
     else:
         p = start_price
+    agents = update_demands(p, agents, informed)
 
-    while not jnp.allclose(total_demand, supply):
+
+    if supply == 0:
+        total_demand = jnp.sum(agents[:,2])
+    else:
+        total_demand = jnp.sum(agents[agents[:,2]>=0, 2])
+    
+
+    iterations = 0
+    while not jnp.allclose(total_demand, supply, rtol=0.15):
         
         if total_demand < supply:
             max_price = p
-        else:
+        elif total_demand > supply:
             min_price = p
+        else:
+            return p
 
         p = (min_price + max_price)/2
         agents = update_demands(p, agents, informed)
-        total_demand = jnp.sum(agents[:,2])
-
+        if supply == 0:
+            total_demand = jnp.sum(agents[:,2])
+        else:
+            total_demand = jnp.sum(agents[agents[:,2]>=0, 2])
+        iterations += 1
+        if iterations > 10000:
+            raise ValueError(f"Price calculation did not converge, current price: {p}, total demand: {total_demand}, supply: {supply}")
+    return p
 
 
 ## For now this is specific to Routledge 2001
-## Takes [fitness, objective_function, informed, signal, demand, demand_function, demand_function_params...] as input
 
 def calculate_fitness(agents: jnp.ndarray, repetitions: int, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
+    """
+    Calculate the fitness of a set of agents
+    agents should have the following columns:
+    [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
     
     returns = jnp.ndarray((len(agents), repetitions))
+    temp = update_demands(0, agents[:, 3:], informed)
+
+    ## TODO: Add check for whether to allow for negatives in demand.
+    ## TODO: Consider equilibrium by finding maximum demand 
+    if market.supply[0] == 0:    
+        market.demand_at_p0 = jnp.sum(temp[:,5])
+    else:
+        market.demand_at_p0 = jnp.sum(temp[temp[:,5]>=0,5])
 
     for i in range(repetitions):
-        returns[:,i] = calculate_returns(agents[:, 2:], market, i, informed)
+        returns[:,i] = calculate_returns(agents[:, 3:], market, i, informed)
     
+## Need to add utility function to agents array getting passed to this function
     returns = calculate_utility(agents, returns, risk_aversion)
 
     for i in range(len(agents)):
-        agents[i, 0] = OBJECTIVE_REGISTRY[agents[i,1]](returns[i], risk_aversion[i])
+        objective_function = OBJECTIVE_REGISTRY[int(agents[i,1])]()
+        agents[i, 0] = objective_function(returns[i], risk_aversion[i])
     
 
     return agents
@@ -70,42 +103,53 @@ def calculate_fitness_accel(agents: jnp.ndarray, repetitions: int) -> jnp.ndarra
 
 
 ## Pretty confident for loop is the only way, but will reevaluate. Demand Functions should always be pretty simple, so optimization is probably less relevant
-## Takes [informed, signal, demand, demand_function, demand_function_params...] as input
-def update_demands(price: float, agents: jnp.ndarray, informed: bool, components: dict = None, market: Market = None) -> jnp.ndarray:
-    
-    """ traders = jnp.where(agents[:,0] == 0)
-    if 'informed' not in components.keys():
-        columns = [components['demand']['col_idx'], components['demand_function']['col_idx']].extend(components['demand_function']['parameter_idxs'])
-        informed = False
-    else:
-        informed = True
-        columns = [components['informed']['col_idx'], components['signal']['col_idx'], components['demand']['col_idx'], components['demand_function']['col_idx']].extend(components['demand_function']['parameter_idxs'])
-    subset = traders[:, columns]
-    subset = update_demands(market.price, subset,informed)
-    #traders[:, columns] = subset
-    agents[traders][:, columns] = subset """
-
+def update_demands(price: float, agents: jnp.ndarray, informed: bool) -> jnp.ndarray:
+    """
+    Update the demand of a set of agents given a price
+    agents should have the following columns:
+    [informed, signal, demand, demand_function, demand_function_params...]
+    """
 
     if informed:
         for i in range(len(agents)):
-            agents[i,2] = DEMAND_REGISTRY[agents[i,3]](price, agents[i,4:], agents[i,1], GAMMA_CONSTANTS[agents[i,0]])
-        else:
-            for i in range(len(agents)):
-                agents[i,0] = DEMAND_REGISTRY[agents[i,1]](price, agents[i,2:])
+            df = DEMAND_REGISTRY[int(agents[i,3])]()
+            agents[i,2] = df(price, agents[i,4:], agents[i,1], GAMMA_CONSTANTS[int(agents[i,0])])
+    else:
+        for i in range(len(agents)):
+            df = DEMAND_REGISTRY[int(agents[i,1])]()
+
+            agents[i,0] = df(price, agents[i,2:])
             
     return agents
 
 
+
 def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
-    utilities = jnp.empty(len(agents), len(returns)) 
+    """
+    Calculate the utility of a set of agents
+    agents should have the following columns:
+    [fitness, objective_function, utility_function]
+    returns should have the following columns:
+    [returns]
+    """
+    utilities = jnp.zeros((len(agents), len(returns[0]))) 
 
     for i in range(len(agents)):
-        utilities[i] = UTILITY_REGISTRY[agents[i,2]](returns[i], risk_aversion[i])
+        utility_function = UTILITY_REGISTRY[int(agents[i,2])]()
+        utilities[i] = utility_function(returns[i], risk_aversion[i])
+
+    return utilities
 
 
 def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, informed: bool = True) -> jnp.ndarray:
+    """
+    Calculate the returns of a set of agents
+    agents should have the following columns:
+    [informed, signal, demand, demand_function, demand_function_params...]
+    """
     
-    market.price = calculate_market_price(agents, market.supply, market.price, informed)
-    return agents[:,2] * (market.dividends[repetition] - market.price) - market.cost_of_info * agents[:,0]
+    market.price = calculate_market_price(agents, market.supply[repetition], market.demand_at_p0, market.price, informed=informed)
+    returns = agents[:,2] * (market.dividends[repetition] - market.price) - market.cost_of_info * agents[:,0]
+    return returns
 
     # return = demand*(dividend - price) - c*informed

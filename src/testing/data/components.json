@@ -1,0 +1,50 @@
+{
+    "agent_type": {
+        "data_type": "int",
+        "description": "The type of agent",
+        "example": "trader",
+        "required": true,
+        "unique": true,
+        "enum": ["trader", "broker", "market_maker"],
+        "col_idx": 0
+    },
+    "learning_algorithm": {
+        "data_type": "int",
+        "description": "The learning algorithm used by the agent",
+        "example": "GeneticAlgorithm",
+        "name": "GeneticAlgorithm",
+        "required": true,
+        "unique": false,
+        "enum": ["GeneticAlgorithm", "Q-Learning", "DeepQNetwork"],
+        "col_idx": 7,
+        "parameter_idxs": [13, 14]
+    },
+    "demand_function": {
+        "data_type": "int",
+        "description": "The demand function used by the agent",
+        "example": "Linear",
+        "required": true,
+        "unique": false,
+        "enum": ["Linear", "Exponential", "Sigmoid"],
+        "col_idx": 3,
+        "parameter_idxs": [11, 12]
+    },
+    "informed": {
+        "data_type": "int",
+        "description": "Whether the agent is informed",
+        "example": "true",
+        "required": true,
+        "unique": false,
+        "col_idx": 9
+    },
+    "signal": {
+        "data_type": "float",
+        "description": "The signal used by the agent, if agent is uniformed = last observed price",
+        "required": true,
+        "unique": false,
+        "col_idx": 10
+    }
+
+
+
+}

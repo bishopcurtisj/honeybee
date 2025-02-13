@@ -1,7 +1,8 @@
 
-import numpy as jnp
+import jax.numpy as jnp
 
 from entities.agent import *
+from constants import *
 from systems.calculations import update_demands
 from entities.market import Market 
 
