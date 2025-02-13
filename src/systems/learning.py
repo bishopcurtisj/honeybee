@@ -20,7 +20,10 @@ class GeneticAlgorithm:
         # Evaluate fitness for each individual
         fitnesses = agents[:,0].copy() 
         min_fitness = jnp.min(fitnesses)
-        adjusted_fitnesses = fitnesses - min_fitness + 1e-6
+        if min_fitness < 0:
+            adjusted_fitnesses = fitnesses - min_fitness + 1e-6
+        else:
+            adjusted_fitnesses = fitnesses
         total_fitness = jnp.sum(adjusted_fitnesses)
 
         crossover_rate = parameters[0][0]
@@ -66,15 +69,19 @@ class GeneticAlgorithm:
 
     def select_individual(self, total_fitness: float, agents: jnp.ndarray, fitnesses: jnp.ndarray) -> jnp.ndarray:
         """Select an individual from the population with probability proportional to its fitness."""
-        
-        r = random.uniform(0, total_fitness)
-        running_sum = 0
-        for ind, fit in zip(agents, fitnesses):
-            running_sum += fit
-            if running_sum >= r:
-                return ind
+        try:
+            r = random.uniform(0, total_fitness)
+            running_sum = 0
+            for ind, fit in zip(agents, fitnesses):
+                running_sum += fit
+                if running_sum >= r:
+                    return ind
+                
         # Fallback (should rarely happen if rounding issues occur)
-        return agents[-1]
+            return agents[-1]
+        except Exception as e:
+            
+            return agents[-1]
 
 LEARNING_REGISTRY = {1: GeneticAlgorithm, 'GeneticAlgorithm': GeneticAlgorithm}
 

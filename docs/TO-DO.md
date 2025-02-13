@@ -1,11 +1,11 @@
 - [x] Remove all unused imports
 - [x] Finish Experiment Driver (Testing Phase)
 - [x] Finish Controller / Decide what to do about Controller (Testing Phase)
-- [ ] Write testing script
-- [ ] Move signal from agents ndarray to market
+- [x] Write testing script
+- [x] Move signal from agents ndarray to market
 - [x] Refactor
-- [ ] Update Jax implementation
-- [ ] Figure out how to make it so that each agent can learn seperately, not sure if possible with Genetic Algorithm
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by regerence isn't allowing for the changes to agents by the controller to be reflected in the experiment.
-
+- [ ] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
+- [ ] Update Jax implementation
+- [ ] Figure out how to make it so that each agent can learn seperately, not sure if possible with Genetic Algorithm
