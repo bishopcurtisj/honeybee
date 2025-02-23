@@ -6,6 +6,10 @@
 - [x] Refactor
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by regerence isn't allowing for the changes to agents by the controller to be reflected in the experiment.
+- [ ] Move away from Routledge assumptions, since they are too restrictive.
+    - [ ] Add new learning algorithm's and agent functions
+    - [ ] Revisit market price calculation
 - [ ] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
+- [ ] Revisit Market class typing, dataclass doesn't allow immutable types?
 - [ ] Update Jax implementation
 - [ ] Figure out how to make it so that each agent can learn seperately, not sure if possible with Genetic Algorithm

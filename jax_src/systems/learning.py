@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-import jax.numpy as jnp
+import numpy as jnp
 from typing import Protocol
 import numpy.random as random
 
@@ -16,14 +16,18 @@ class GeneticAlgorithm:
     [fitness, informed, demand_function_params...]
     """
 
-
     def __call__(self, agents: jnp.ndarray, parameters: jnp.ndarray, pop_size: int, informed: bool = True) -> jnp.ndarray:
         # Evaluate fitness for each individual
-        total_fitness = jnp.sum(agents[:,0])
-        fitnesses = agents[:,0]
+        fitnesses = agents[:,0].copy() 
+        min_fitness = jnp.min(fitnesses)
+        if min_fitness < 0:
+            adjusted_fitnesses = fitnesses - min_fitness + 1e-6
+        else:
+            adjusted_fitnesses = fitnesses
+        total_fitness = jnp.sum(adjusted_fitnesses)
 
-        crossover_rate = parameters[0]
-        mutation_rate = parameters[1]
+        crossover_rate = parameters[0][0]
+        mutation_rate = parameters[1][0]
 
         new_population = jnp.empty_like(agents)
         new_population[:,0] = agents[:,0]
@@ -32,9 +36,9 @@ class GeneticAlgorithm:
 
         # Crossover + Mutation: create new offspring
         try:
-            for i in range(pop_size, step = 2):
-                parent1 = self.select_individual(total_fitness, agents, fitnesses)[1:]
-                parent2 = self.select_individual(total_fitness, agents, fitnesses)[1:]
+            for i in range(0, pop_size, 2):
+                parent1 = self.select_individual(total_fitness=total_fitness, agents=agents, fitnesses=adjusted_fitnesses)[1:]
+                parent2 = self.select_individual(total_fitness=total_fitness, agents=agents, fitnesses=adjusted_fitnesses)[1:]
 
                 # Perform crossover with some probability
                 if random.random() < crossover_rate:
@@ -63,17 +67,21 @@ class GeneticAlgorithm:
 
         return new_population
 
-    def select_individual(total_fitness: float, agents: jnp.ndarray, fitnesses: jnp.ndarray) -> jnp.ndarray:
+    def select_individual(self, total_fitness: float, agents: jnp.ndarray, fitnesses: jnp.ndarray) -> jnp.ndarray:
         """Select an individual from the population with probability proportional to its fitness."""
-        
-        r = random.uniform(0, total_fitness)
-        running_sum = 0
-        for ind, fit in zip(agents, fitnesses):
-            running_sum += fit
-            if running_sum >= r:
-                return ind
+        try:
+            r = random.uniform(0, total_fitness)
+            running_sum = 0
+            for ind, fit in zip(agents, fitnesses):
+                running_sum += fit
+                if running_sum >= r:
+                    return ind
+                
         # Fallback (should rarely happen if rounding issues occur)
-        return agents[-1]
+            return agents[-1]
+        except Exception as e:
+            
+            return agents[-1]
 
 LEARNING_REGISTRY = {1: GeneticAlgorithm, 'GeneticAlgorithm': GeneticAlgorithm}
 

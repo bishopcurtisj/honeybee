@@ -21,19 +21,18 @@ class TestExperiment(unittest.TestCase):
         self.assertIsInstance(experiment.agents, jnp.ndarray)
         self.assertIsInstance(experiment.components, AgentInfo)
 
-    # def test_dummy_run(self):
-    #     market = RoutledgeMarket()
-    #     experiment = Experiment(market, 'src/testing/data/dummy_agents.csv', 'src/testing/data/components.json')
-    #     results = experiment.run(2, 2)
-    #     self.assertIsInstance(results, jnp.ndarray)
+    def test_dummy_run(self):
+        market = RoutledgeMarket()
+        experiment = Experiment(market, 'src/testing/data/dummy_agents.csv', 'src/testing/data/components.json')
+        results = experiment.run(2, 2)
+        self.assertIsInstance(results, jnp.ndarray)
 
 
-    def test_routledge(self):
-
+    def test_run(self):
         market = RoutledgeMarket()
         experiment = Experiment(market, 'src/testing/data/agents.csv', 'src/testing/data/components.json')
-        results = experiment.run(repetitions=1000, generations=5_000)
+        results = experiment.run()
         self.assertIsInstance(results, jnp.ndarray)
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()

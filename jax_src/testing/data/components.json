@@ -12,7 +12,7 @@
         "data_type": "int",
         "description": "The learning algorithm used by the agent",
         "example": "GeneticAlgorithm",
-        "name": "learning_algorithm",
+        "name": "GeneticAlgorithm",
         "required": true,
         "unique": false,
         "enum": ["GeneticAlgorithm", "Q-Learning", "DeepQNetwork"],
@@ -42,7 +42,7 @@
         "description": "The signal used by the agent, if agent is uniformed = last observed price",
         "required": true,
         "unique": false,
-        "col_idx": 5
+        "col_idx": 10
     }
 
 

@@ -7,7 +7,7 @@ GAMMA_CONSTANTS = [1,1]
 
 
 ## TODO: Agent demand functions don't necessarily intersect, need to redesign.
-def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: float, start_price: float = 0, min_price: float = 0, max_price: float = 100_000, informed: bool = True) -> float:
+def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: float, min_price: float = 0, max_price: float = 100_000, informed: bool = True) -> float:
     """
     Calculate the market price of a good given a set of agents and their demands
 
@@ -28,13 +28,11 @@ def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: f
     """
 
     if maximum_supply < supply:
-        supply = maximum_supply
+        supply = maximum_supply*0.9
 
 
-    if start_price == 0:
-        p = (min_price + max_price)/2
-    else:
-        p = start_price
+    p = (min_price + max_price)/2
+    
     agents = update_demands(p, agents, informed)
 
 
@@ -45,7 +43,7 @@ def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: f
     
 
     iterations = 0
-    while not jnp.allclose(total_demand, supply, rtol=0.15):
+    while not jnp.allclose(total_demand, supply, rtol=0.001):
         
         if total_demand < supply:
             max_price = p
@@ -64,43 +62,6 @@ def calculate_market_price(agents: jnp.ndarray, supply: float, maximum_supply: f
         if iterations > 10000:
             raise ValueError(f"Price calculation did not converge, current price: {p}, total demand: {total_demand}, supply: {supply}")
     return p
-
-
-## For now this is specific to Routledge 2001
-
-def calculate_fitness(agents: jnp.ndarray, repetitions: int, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
-    """
-    Calculate the fitness of a set of agents
-    agents should have the following columns:
-    [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
-    
-    returns = jnp.ndarray((len(agents), repetitions))
-    temp = update_demands(0, agents[:, 3:], informed)
-
-    ## TODO: Add check for whether to allow for negatives in demand.
-    ## TODO: Consider equilibrium by finding maximum demand 
-    if market.supply[0] == 0:    
-        market.demand_at_p0 = jnp.sum(temp[:,5])
-    else:
-        market.demand_at_p0 = jnp.sum(temp[temp[:,5]>=0,5])
-
-    for i in range(repetitions):
-        returns[:,i] = calculate_returns(agents[:, 3:], market, i, informed)
-    
-## Need to add utility function to agents array getting passed to this function
-    returns = calculate_utility(agents, returns, risk_aversion)
-
-    for i in range(len(agents)):
-        objective_function = OBJECTIVE_REGISTRY[int(agents[i,1])]()
-        agents[i, 0] = objective_function(returns[i], risk_aversion[i])
-    
-
-    return agents
- 
-## Parallelized 1-period simultaions
-def calculate_fitness_accel(agents: jnp.ndarray, repetitions: int) -> jnp.ndarray:
-    pass
-
 
 ## Pretty confident for loop is the only way, but will reevaluate. Demand Functions should always be pretty simple, so optimization is probably less relevant
 def update_demands(price: float, agents: jnp.ndarray, informed: bool) -> jnp.ndarray:
@@ -122,7 +83,50 @@ def update_demands(price: float, agents: jnp.ndarray, informed: bool) -> jnp.nda
             
     return agents
 
+## For now this is specific to Routledge 2001
 
+def calculate_fitness(agents: jnp.ndarray, repetitions: int, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
+    """
+    Calculate the fitness of a set of agents
+    agents should have the following columns:
+    [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
+    
+    returns = jnp.ndarray((len(agents), repetitions))
+    temp = update_demands(0, agents[:, 3:], informed)
+
+    ## TODO: Consider equilibrium by finding maximum demand 
+    if market.supply[0] == 0:    
+        market.demand_at_p0 = jnp.sum(temp[:,5])
+    else:
+        market.demand_at_p0 = jnp.sum(temp[temp[:,5]>=0,5])
+
+    for i in range(repetitions):
+        returns[:,i] = calculate_returns(agents[:, 3:], market, i, informed)
+    
+## Need to add utility function to agents array getting passed to this function
+    returns = calculate_utility(agents, returns, risk_aversion)
+
+    for i in range(len(agents)):
+        objective_function = OBJECTIVE_REGISTRY[int(agents[i,1])]()
+        agents[i, 0] = objective_function(returns[i], risk_aversion[i])
+    
+
+    return agents
+ 
+
+
+def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, informed: bool = True) -> jnp.ndarray:
+    """
+    Calculate the returns of a set of agents
+    agents should have the following columns:
+    [informed, signal, demand, demand_function, demand_function_params...]
+    """
+    
+    market.price = calculate_market_price(agents, market.supply[repetition], market.demand_at_p0,  informed=informed)
+    returns = agents[:,2] * (market.dividends[repetition] - market.price) - market.cost_of_info * agents[:,0]
+    return returns
+
+    # return = demand*(dividend - price) - c*informed
 
 def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
     """
@@ -141,15 +145,3 @@ def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion: 
     return utilities
 
 
-def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, informed: bool = True) -> jnp.ndarray:
-    """
-    Calculate the returns of a set of agents
-    agents should have the following columns:
-    [informed, signal, demand, demand_function, demand_function_params...]
-    """
-    
-    market.price = calculate_market_price(agents, market.supply[repetition], market.demand_at_p0, market.price, informed=informed)
-    returns = agents[:,2] * (market.dividends[repetition] - market.price) - market.cost_of_info * agents[:,0]
-    return returns
-
-    # return = demand*(dividend - price) - c*informed

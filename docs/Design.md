@@ -1,57 +1,38 @@
-# Questions
 
-Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i.d 
+# Experiment.py
 
-Should we use a controller to send the array slices to functions, or build the parsing into the functions.
+## Purpose
 
-How flexible should I allow the structure of agents to be?
+## To do 
 
+# Agent.py
+## Purpose
 
+## To do 
+- Need to add new demand, utility, and objective function options
+# Market.py
+## Purpose
 
-Limit order book vs Intersecting demand/supply
+## To do 
+- Need to determine best data class to use, needs to allow for ndarrays, and be mutable if possible
 
-## Entities
+# Calculations.py
+## Purpose
 
-- Agents
-- Market?
-	- Unique object, named tuple with values such as price.
-- Controller
-	- Handles the sending of relevant values from the agents ndarray to  each function
-## Components
+## To do 
+- Need to reevaluate fitness calculation
+# Learning.py
+## Purpose
 
-**Traders** 
-- ID: int -> Just use index of ndarray?
-- Informed (0 | 1)
-- Learning algorithm
-	- int that is converted to function using REGISTRY
-- Utility Function
-	- int that is converted to function using REGISTRY
-- Demand Function
-	- int that is converted to function using REGISTRY
-- Demand
-	- Negative demand = supply
-- Objective Function
-	- int that is converted to function using REGISTRY
-- Fitness
-- Function parameter values
-- Signal
-- Previous Period Return
-- Aggregate Return
-- Cost of signal
+## To do 
+- Need to add new learning algorithm's
+	- Thompson Sampling
+	- Neural Networks
+	- BUCB
 
-**Market**
-- Price
-- Demands
+# Trade.py
+## Purpose
 
-## Systems
-
-Initializer
-	Initializes the agents and experiment given the details in agents.csv and components.json
-	
-
-Agent learning algorithm
-	
-
-Trading mechanism
-	Market uses iterative methods to identify the price that balances demands
-	Routledge uses randomly set supply rather than coordinating bid asks
+## To do 
+- Need a data structure to hold orders
+- For price sorting, what increments should be allowed? 0.01 makes logical sense for real-world comparison, but requires a little extra checks. May save compute time if any searches or iterative methods need to be performed.
