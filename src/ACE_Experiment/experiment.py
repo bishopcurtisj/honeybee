@@ -31,7 +31,8 @@ class Experiment:
     def run(self, generations: int = 20, repetitions: int = 100):
         
         for _ in range(generations):
-            self.update_agent_demand()
+            self.get_agent_spread()
+            self.trade()
             self.calculate_agent_fitness(repetitions)
             self.learn()
             self.trade()
@@ -71,7 +72,8 @@ class Experiment:
             self.agents[:,self.components.signal] = jnp.where(self.agents[:, self.components.informed]== 0, self.market.price, self.market.signal[0])
 
     def trade(self):
-        pass
+        self.order_book = OrderBook()
+        traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
 
     def calculate_agent_fitness(self, repetitions: int):
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
@@ -86,20 +88,20 @@ class Experiment:
         subset = calculate_fitness(subset, repetitions, self.agents[traders][:, self.components.risk_aversion], self.market, informed)
         self.agents[traders[:, None], columns] = subset
 
-        
-
-    def update_agent_demand(self):
-        # Extract valid trader indices
+    def get_agent_spread(self):
+        """
+        Calculate the bid-ask spread of the agents
+        """
         traders = jnp.where(self.agents[:, self.components.agent_type] == 0)[0]  # Extract the first element of the tuple
         
         if self.components.informed == None:
             # Correctly concatenate lists before converting to jnp.array
-            columns = jnp.array([self.components.demand, self.components.demand_function] + self.components.demand_fx_params)
+            columns = jnp.array([self.components.bid, self.components.ask, self.components.bid_quantity, self.components.ask_quantity, self.components.demand_function, self.components.confidence] + self.components.demand_fx_params)
             informed = False
         else:
             informed = True
             columns = jnp.array(
-                [self.components.informed, self.components.signal, self.components.demand, self.components.demand_function,] + 
+                [self.components.informed, self.components.signal, self.components.bid, self.components.ask, self.components.bid_quantity, self.components.ask_quantity, self.components.demand_function, self.components.confidence] + 
                 self.components.demand_fx_params
             )
 
