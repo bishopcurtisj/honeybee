@@ -2,6 +2,7 @@ import numpy as jnp
 
 from entities.agent import *
 from entities.market import Market
+from systems.trade import *
 
 GAMMA_CONSTANTS = [1,1]
 
@@ -47,50 +48,37 @@ def calculate_spread(agents: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
 
     
 
-## For now this is specific to Routledge 2001
 
-def calculate_fitness(agents: jnp.ndarray, repetitions: int, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
+def calculate_fitness(agents: jnp.ndarray, repetitions: int, trades: jnp.ndarray, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
     """
     Calculate the fitness of a set of agents
     agents should have the following columns:
     [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
+    returns = calculate_returns(agents, market, repetitions, trades, informed)
+    utilities = calculate_utility(agents, returns, risk_aversion)
     
-    returns = jnp.ndarray((len(agents), repetitions))
-    temp = update_demands(0, agents[:, 3:], informed)
-
-    ## TODO: Consider equilibrium by finding maximum demand 
-    if market.supply[0] == 0:    
-        market.demand_at_p0 = jnp.sum(temp[:,5])
-    else:
-        market.demand_at_p0 = jnp.sum(temp[temp[:,5]>=0,5])
-
-    for i in range(repetitions):
-        returns[:,i] = calculate_returns(agents[:, 3:], market, i, informed)
-    
-## Need to add utility function to agents array getting passed to this function
-    returns = calculate_utility(agents, returns, risk_aversion)
-
     for i in range(len(agents)):
         objective_function = OBJECTIVE_REGISTRY[int(agents[i,1])]()
-        agents[i, 0] = objective_function(returns[i], risk_aversion[i])
-    
+        agents[i, 0] = objective_function(utilities[i], risk_aversion[i])
 
     return agents
  
 
 
-def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, informed: bool = True) -> jnp.ndarray:
+def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, trades: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
     """
     Calculate the returns of a set of agents
     agents should have the following columns:
-    [informed, signal, demand, demand_function, demand_function_params...]
+    [informed, ...]
+    trades should have the following columns:
+    [quantity, total spendings]
     """
-    
-    market.price = calculate_market_price(agents, market.supply[repetition], market.demand_at_p0,  informed=informed)
-    returns = agents[:,2] * (market.dividends[repetition] - market.price) - market.cost_of_info * agents[:,0]
-    return returns
 
-    # return = demand*(dividend - price) - c*informed
+    if informed:
+        returns = trades[:, 0] * market.dividends[repetition] - trades[:,1] - market.cost_of_info * agents[:,0]
+    else:
+        returns = trades[:, 0] * market.dividends[repetition] - trades[:,1]
+    return returns
 
 def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
     """

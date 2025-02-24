@@ -7,7 +7,7 @@ from entities.agent import AgentInfo
 from entities.market import Market
 from systems.calculations import *
 from systems.learning import *
-from systems.trade import *
+from systems.trade import OrderBook
 
 
 class Experiment:
@@ -31,9 +31,9 @@ class Experiment:
     def run(self, generations: int = 20, repetitions: int = 100):
         
         for _ in range(generations):
-            self.get_agent_spread()
-            self.trade()
-            self.calculate_agent_fitness(repetitions)
+            
+            trades = self.trade(repetitions)
+            self.calculate_agent_fitness(repetitions, trades)
             self.learn()
             self.trade()
         
@@ -71,11 +71,26 @@ class Experiment:
         if self.components.informed != None:
             self.agents[:,self.components.signal] = jnp.where(self.agents[:, self.components.informed]== 0, self.market.price, self.market.signal[0])
 
-    def trade(self):
-        self.order_book = OrderBook()
+    def trade(self, repetitions: int):
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
+        self.get_agent_spread()
+        agent_ids = traders[:, self.components.id]
+        trades = jnp.zeros((len(self.agents), repetitions, 2))
 
-    def calculate_agent_fitness(self, repetitions: int):
+        for repetition in range(repetitions):
+            trade_order = jnp.random.permutation(agent_ids)
+            for agent_id in trade_order:
+                self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.bid], self.agents[agent_id, self.components.bid_quantity])
+                self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.ask], self.agents[agent_id, self.components.ask_quantity])
+            agent_trades = self.market.order_book.get_trades()
+            for agent_id in agent_ids:
+                if agent_id in agent_trades.keys():
+                    trades[agent_id, repetition] = np.array(agent_trades[agent_id][:,0].sum(), np.sum(agent_trades[agent_id][:,1]*agent_trades[agent_id][:,0]))
+            self.market.order_book.reset()
+                
+        return trades
+
+    def calculate_agent_fitness(self, repetitions: int, trades: jnp.ndarray):
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
         if self.components.informed == None:
             columns = np.array([self.components.fitness, self.components.objective_function, self.components.utility_function, self.components.demand, self.components.demand_function] + self.components['demand_function']['parameter_idxs'])
@@ -85,7 +100,7 @@ class Experiment:
             columns = np.array([self.components.fitness, self.components.objective_function, self.components.utility_function, self.components.informed ,self.components.signal ,self.components.demand, self.components.demand_function] + self.components.demand_fx_params)
         subset = self.agents[traders][:, columns]  # Corrected indexing
         
-        subset = calculate_fitness(subset, repetitions, self.agents[traders][:, self.components.risk_aversion], self.market, informed)
+        subset = calculate_fitness(subset, repetitions, trades, self.agents[traders][:, self.components.risk_aversion], self.market, informed)
         self.agents[traders[:, None], columns] = subset
 
     def get_agent_spread(self):
