@@ -71,6 +71,8 @@ class Experiment:
         if self.components.informed != None:
             self.agents[:,self.components.signal] = jnp.where(self.agents[:, self.components.informed]== 0, self.market.price, self.market.signal[0])
 
+
+## Refactor to vectorize
     def trade(self, repetitions: int):
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
         self.get_agent_spread()
