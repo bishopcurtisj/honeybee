@@ -7,7 +7,6 @@ from entities.agent import AgentInfo
 from entities.market import Market
 from systems.calculations import *
 from systems.learning import *
-from systems.trade import OrderBook
 
 
 class Experiment:

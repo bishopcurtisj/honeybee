@@ -83,5 +83,9 @@ class GeneticAlgorithm:
             
             return agents[-1]
 
-LEARNING_REGISTRY = {1: GeneticAlgorithm, 'GeneticAlgorithm': GeneticAlgorithm}
+@dataclass(frozen=True, kw_only=True, slots=True)
+class ThompsonSampler:
+    def __call__(self) -> jnp.ndarray:
+        ...
+LEARNING_REGISTRY = {1: GeneticAlgorithm, 'GeneticAlgorithm': GeneticAlgorithm, 2: ThompsonSampler, 'ThompsonSampler': ThompsonSampler}
 

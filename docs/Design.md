@@ -34,6 +34,14 @@
 # Learning.py
 ### Purpose
 	Contains the implementations of possible learning functions for agents
+
+### Options
+ - Genetic Algorithm
+ - Thompson Sampling
+	 - Takes a draw from binomial to determine informed status
+	 - Takes draw from Demand functions
+	 - Takes draw from prior distribution over demand function parameters
+
 ### To do 
 - Need to add new learning algorithm's
 	- Thompson Sampling
@@ -46,3 +54,4 @@
 
 ### To do 
 - For price sorting, what increments should be allowed? 0.01 makes logical sense for real-world comparison, but requires a little extra checks. May save compute time if any searches or iterative methods need to be performed.
+- Decide if trade order should be randomized
