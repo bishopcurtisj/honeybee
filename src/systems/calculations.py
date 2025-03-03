@@ -7,20 +7,26 @@ from systems.trade import *
 GAMMA_CONSTANTS = [1,1]
 
 
-def calculate_spread(agents: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
+def calculate_spread(agents: jnp.ndarray,max_price: float, informed: bool = True) -> jnp.ndarray:
     """
     Calculate the bid-ask spread of a set of agents
     agents should have the following columns:
     [informed, signal, bid, ask, bid_quantity, ask_quantity, demand_function, confidence, demand_function_params...]
     """
-    price = 100 ## Dummy needs to be replaced
+    min_price = 0
+    price = (max_price + min_price) / 2
+
     if informed:
         for i in range(len(agents)):
             df = DEMAND_REGISTRY[int(agents[i,6])]()
             demand = df(price, agents[i,8:], agents[i,1], GAMMA_CONSTANTS[int(agents[i,0])])
 
-            while demand != 0:
-                price = price + 0.01 # needs to be changed
+            while jnp.allclose(demand, 0, atol=1e-2) == False:
+                if demand > 0:
+                    min_price = price
+                else:
+                    max_price = price
+                price = (max_price + min_price) / 2
                 demand = df(price, agents[i,8:], agents[i,1], GAMMA_CONSTANTS[int(agents[i,0])])
 
             bid = price - agents[i,7]

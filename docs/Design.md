@@ -41,6 +41,7 @@
 	 - Takes a draw from binomial to determine informed status
 	 - Takes draw from Demand functions
 	 - Takes draw from prior distribution over demand function parameters
+	 - Maybe I should represent the competing draws as different agents that have a flag indicating they are the same agent. This poses issues though such as interaction across phantom agents. With multiple Thompson samplers there would be a lot of noise since each agents potential paths would affect the decisions of every other agent. In order to do this properly we'd likely need to simulate every permutation which get's very large very quickly. Alternatively perhaps the law of large numbers will allow us to converge to the true performance of decisions by simply including that Thompson agent version in sufficient simulations. Maybe each repetition the agent is swapped between the options 
 
 ### To do 
 - Need to add new learning algorithm's
