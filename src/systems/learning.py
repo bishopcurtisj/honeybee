@@ -25,7 +25,7 @@ class ModelController:
     def learn(self, agents: jnp.ndarray, components: AgentInfo, informed: bool = True) -> jnp.ndarray:
         agents[self.ga_learners] = self.genetic_algorithm(agents[self.ga_learners], agents[self.ga_learners][components.learning_params], len(agents), informed)
         agents[self.ts_learners] = self.thompson_sampler(agents[self.ts_learners], agents[self.ts_learners][components.learning_params], informed)
-        agents[self.nn_learners] = self.neural_network(agents[self.nn_learners])
+        agents = self.neural_network(agents, self.nn_learners)
 
         return agents
 

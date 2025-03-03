@@ -42,8 +42,6 @@ class Experiment:
         self.save()
         return self.agents
 
-
-    ## Need to test this to verify how write works with jnp arrays
     def save(self):
 
         np.savetxt("results.csv", self.agents, delimiter=",", fmt="%.2f", header=",".join(self.headers), comments='')

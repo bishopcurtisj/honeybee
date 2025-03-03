@@ -17,6 +17,11 @@ Both?
 
 Should I use a queue, a matching, or an auction
 	A queue seems easiest to implement and leads to less follow up questions such as how to handle spread or what price it is executed at.
+
+## Learning
+
+Rather than simulate a spread of actions for each agent in order to generate training date, we can view every agent as being alternative actions / rewards. In this case the variance of initial states can be seen as a single agent exploring, convergence will then depend on the learning algorithm, rather than initial states.
+
 ## Entities
 
 - Agents
