@@ -4,8 +4,7 @@ from sortedcontainers import SortedDict
 import numpy as jnp
 
 from entities.agent import *
-from systems.calculations import update_demands
-from entities.market import Market 
+
 
 class Order:
     __slots__ = ("trader_id", "price", "quantity")

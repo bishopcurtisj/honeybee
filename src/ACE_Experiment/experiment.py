@@ -6,7 +6,8 @@ import numpy as np
 from entities.agent import AgentInfo
 from entities.market import Market
 from systems.calculations import *
-from systems.learning import *
+from systems.learning import model_controller, LEARNING_REGISTRY
+
 
 
 class Experiment:
@@ -24,6 +25,8 @@ class Experiment:
         else:
             self.components.add('informed', None)
         
+
+        model_controller.init_models(self.agents, self.components)
         
 
 
@@ -47,7 +50,6 @@ class Experiment:
 
 
     def learn(self):
-        traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
         if self.components.informed == None:
             columns = jnp.array([self.components.fitness]+self.components.demand_fx_params)
             informed = False
@@ -55,18 +57,15 @@ class Experiment:
             informed = True
             columns = jnp.array([self.components.fitness, self.components.informed] + self.components.demand_fx_params)
 
-        params = self.agents[traders][:, jnp.array(self.components.learning_params)]
-        subset = self.agents[traders][:, columns]   
+        params = self.agents[:, jnp.array(self.components.learning_params)]
+        subset = self.agents[:, columns]   
 
-        ## Update to allow for different learning algorithms
-        learning_function = LEARNING_REGISTRY[self.agents[0, self.components.learning_algorithm]]()
+        subset = model_controller.learn(subset, params, informed)
 
-        subset = learning_function(subset, params, len(subset), informed)
-
-        self.agents[traders[:, None], columns] = subset
+        self.agents[:, columns] = subset
         self.market.new_period()
+
         ## Update signal        
-        
         if self.components.informed != None:
             self.agents[:,self.components.signal] = jnp.where(self.agents[:, self.components.informed]== 0, self.market.price, self.market.signal[0])
 
@@ -125,9 +124,11 @@ class Experiment:
         subset = self.agents[traders][:, columns]  # Corrected indexing
         
         # Update demand function
-        subset = update_demands(self.market.price, subset, informed)
+        subset = self.update_demands(self.market.price, subset, informed)
         
         # Store updated values back in agents array
         self.agents[traders[:, None], columns] = subset
 
+    def update_demands():
+        pass
     
