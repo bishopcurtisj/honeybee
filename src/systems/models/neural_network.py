@@ -14,6 +14,7 @@ class NeuralNetwork:
             self.model_paths[agent[components.agent_id]] = path
 
         
+    ## Right now assumes informed agents exist
     def _build_model(self, params: jnp.ndarray) -> tf.keras.Model:
         input_shape, hidden_layers, hidden_nodes, demand_fx_params = params
         inputs = tf.keras.Input(shape=(input_shape,))
