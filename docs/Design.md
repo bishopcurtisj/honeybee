@@ -1,7 +1,6 @@
 
 # Experiment.py
 
-## Purpose
 	Acts as the driver for the simulation. 
 ## Functions
 
@@ -13,7 +12,7 @@
 
 
 # Agent.py
-### Purpose
+
 	 Contains functions used by Agents such as demand and utility
 
 ### To do 
@@ -21,18 +20,16 @@
 # Market.py
 	Stores values about the market environment that are consistent across all agents.
 
-### Purpose
-
 ### To do 
 - Need to determine best data class to use, needs to allow for ndarrays, and be mutable if possible
 
 # Calculations.py
-### Purpose
+
 	Utility module for performing calculations needed by larger functions.
 ### To do 
 
 # Learning.py
-### Purpose
+
 	Contains the implementations of possible learning functions for agents
 
 ### Options
@@ -42,6 +39,7 @@
 	 - Takes draw from Demand functions
 	 - Takes draw from prior distribution over demand function parameters
  - Neural Network
+	Neural Network fits relationship between agent characteristics and fitness, then uses ascent algorithm to find the inputs that lead to the highest fitness.
 	- To prevent storing all of the parameters in memory, need to write and load from pickl files 
 	- Need to revisit ascent algorithm
 
@@ -52,7 +50,7 @@
 	- BUCB
 
 # Trade.py
-### Purpose
+
 	Manages the Limit Order Book that the agents use to trade
 
 ### To do 
