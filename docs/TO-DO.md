@@ -10,6 +10,6 @@
     - [ ] Add new learning algorithm's and agent functions
     - [ ] Revisit market price calculation
 - [ ] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
-- [ ] Revisit Market class typing, dataclass doesn't allow immutable types?
+- [x] Revisit Market class typing, dataclass doesn't allow immutable types?
 - [ ] Update Jax implementation
-- [ ] Figure out how to make it so that each agent can learn seperately, not sure if possible with Genetic Algorithm
+- [ ] Refactor functions so that instead of checking for informed, they are overridden when informed is passed in
