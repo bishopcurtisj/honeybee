@@ -1,9 +1,8 @@
 # Questions
 
-Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i.d 
+Memory vs performance.
+flag?
 
-Negative binomial to decide how much to purchase, demand function parameters define distribution shape
-Tighten prior if agent is informed
 
 
 ### Limit order book vs Intersecting demand/supply
@@ -69,3 +68,10 @@ Agent learning algorithm
 Trading mechanism
 	Market uses iterative methods to identify the price that balances demands
 	Routledge uses randomly set supply rather than coordinating bid asks
+
+
+## Thompson Sampler
+
+Negative binomial to decide how much to purchase, demand function parameters define distribution shape
+Tighten prior if agent is informed
+	If agent is informed they are given a larger sample size. Easiest way to implement is to give uninformed agents some ratio of the total 

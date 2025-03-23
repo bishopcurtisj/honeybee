@@ -8,8 +8,10 @@
 - [x] Figure out why pass by regerence isn't allowing for the changes to agents by the controller to be reflected in the experiment.
 - [ ] Move away from Routledge assumptions, since they are too restrictive.
     - [ ] Add new learning algorithm's and agent functions
-    - [ ] Revisit market price calculation
-- [ ] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
+    - [x] Revisit market price calculation
+- [x] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
 - [x] Revisit Market class typing, dataclass doesn't allow immutable types?
 - [ ] Update Jax implementation
-- [ ] Refactor functions so that instead of checking for informed, they are overridden when informed is passed in
+- [ ] Refactor neural network to instead learn best trades, then estimate the decision rule that leads to these trades.
+- [ ] Add ability to add custom demand functions similar to mlflow pyfunc wrappers.
+	- [ ] ABC class
