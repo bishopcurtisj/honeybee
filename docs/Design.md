@@ -30,14 +30,16 @@
 
 # Learning.py
 
+*This is redundant now that I've split the learning algorithms into separate files, need to move the controller logic into Experiment.trade()*
+
 	Contains the implementations of possible learning functions for agents
 
 ### Options
  - Genetic Algorithm
- - Thompson Sampling
-	 - Takes a draw from binomial to determine informed status
-	 - Takes draw from Demand functions
-	 - Takes draw from prior distribution over demand function parameters
+ - ==Thompson Sampling==
+	 - ==Takes a draw from binomial to determine informed status==
+	 - ==Takes draw from Demand functions==
+	 - ==Takes draw from prior distribution over demand function parameters==
  - Neural Network
 	Neural Network fits relationship between agent characteristics and fitness, then uses ascent algorithm to find the inputs that lead to the highest fitness.
 	- To prevent storing all of the parameters in memory, need to write and load from pickl files 
@@ -45,8 +47,6 @@
 
 ### To do 
 - Need to add new learning algorithm's
-	- Thompson Sampling
-	- Neural Networks
 	- BUCB
 
 # Trade.py

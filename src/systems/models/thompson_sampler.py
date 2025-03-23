@@ -13,7 +13,7 @@ class ThompsonSampler:
             demand_fx_params = agents[:, 2:]
             informed_prior = params[:, 0]
             informed_likelihood = params[:, 1]
-            params = params[:, 2:]
+            params = params[:, 2:] 
             ## Sample from prior on both informed and uninformed to determine whether agent will be informed in following period
 
         else:

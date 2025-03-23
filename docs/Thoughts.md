@@ -2,6 +2,8 @@
 
 Routledge sets the supply of the assets to a random variable $e_t$. Which is i.i.d 
 
+Negative binomial to decide how much to purchase, demand function parameters define distribution shape
+Tighten prior if agent is informed
 
 
 ### Limit order book vs Intersecting demand/supply

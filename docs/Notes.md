@@ -1,4 +1,3 @@
 
-max return 274.66
-min return -88.65
+should the model learn optimal trades and then estimate the model that performs the best trades.
 
