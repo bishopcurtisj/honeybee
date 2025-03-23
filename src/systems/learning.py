@@ -1,31 +1,40 @@
+from typing import List, Union
+
 import numpy as jnp
-import numpy.random as random
-import pickle
 import numpy.random as random
 
 from entities.agent import AgentInfo
-from systems.models.genetic_algorithm import GeneticAlgorithm
+from systems.models.model import Model
+from systems.models.genetic_algorithm import genetic_algorithm
 from systems.models.neural_network import NeuralNetwork
-from systems.models.thompson_sampler import ThompsonSampler
+from systems.models.thompson_sampler import thompson_sampler
+
+
+
 
 class ModelController:
     
     def init_models(self, agents: jnp.ndarray, components: AgentInfo):
-        self.ga_learners = jnp.where(agents[:,components.learning_algorithm] == 1)[0]
-        self.ts_learners = jnp.where(agents[:,components.learning_algorithm] == 2)[0]
-        self.nn_learners = jnp.where(agents[:,components.learning_algorithm] == 3)[0]
-        self.genetic_algorithm = GeneticAlgorithm()
-        self.thompson_sampler = ThompsonSampler()
-        self.neural_network = NeuralNetwork(agents[self.nn_learners], components)
-        self.models = [self.genetic_algorithm, self.thompson_sampler, self.neural_network]
-
+        neural_network = NeuralNetwork(agents[self.nn_learners], components)
+        self.model_registry = {'genetic_algorithm': {'func': genetic_algorithm, 'id': 1}, 'thompson_sampler': {'func': thompson_sampler, 'id': 2}, 'neural_network': {'func': neural_network, 'id': 3}}
     
 
 
+    def register_models(self, models: Union[List[Model], Model]):
+    
+        if type(models) == Model:
+            models = [models]
+        for model in models:
+            try:
+                assert issubclass(model, Model)
+            except AssertionError:
+                raise ValueError(f"Custom learning function {model.label} must be a subclass of Model")
+            self.model_registry[model.label] = {'func': model, 'id': len(self.model_registry)}
+
     def learn(self, agents: jnp.ndarray, components: AgentInfo, informed: bool = True) -> jnp.ndarray:
-        agents[self.ga_learners] = self.genetic_algorithm(agents[self.ga_learners], agents[self.ga_learners][components.learning_params], len(agents), informed)
-        agents[self.ts_learners] = self.thompson_sampler(agents[self.ts_learners], agents[self.ts_learners][components.learning_params], informed)
-        agents = self.neural_network(agents, self.nn_learners)
+        
+        for model in self.model_registry.values():
+            agents[jnp.where(agents[:,components.learning_algorithm] == model['id'])[0]] = model['func'](agents[jnp.where(agents[:,components.learning_algorithm] == model['id'])[0]], agents[jnp.where(agents[:,components.learning_algorithm] == model['id'])[0]][components.learning_params], informed)
 
         return agents
 

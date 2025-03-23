@@ -6,7 +6,7 @@ import numpy as np
 from entities.agent import AgentInfo
 from entities.market import Market
 from systems.calculations import *
-from systems.learning import model_controller, LEARNING_REGISTRY
+from systems.learning import model_controller
 
 
 

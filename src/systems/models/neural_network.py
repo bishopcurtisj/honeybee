@@ -1,14 +1,23 @@
+import pickle
+
 import numpy as jnp
 import tensorflow as tf
-import pickle
 import scipy.optimize as opt
 
 from entities.agent import AgentInfo
 
+
 class NeuralNetwork:
+
+    """
+    agents: jnp.ndarray
+        Agents should have the columns:
+        [id, fitness, informed, demand_function_params...] 
+    """
 
     def __init__(self, agents: jnp.ndarray, components: AgentInfo):
         self.models = {}
+        self.agents = agents
         for agent in agents:
             self.models[agent[components.agent_id]] = {}
             self.models[agent[components.agent_id]]['input_shape', 'hidden_layers', 'hidden_nodes', 'demand_fx_params', 'optimizer', 'epochs', 'loss', 'optimization_steps', 'learning_rate'] = agent[components.learning_params]
@@ -43,17 +52,14 @@ class NeuralNetwork:
         outputs = agents[:, 1]
         return inputs, outputs
 
-    def __call__(self, agents: jnp.ndarray, nn_learners: jnp.ndarray) -> jnp.ndarray:
-        """
-        agents: jnp.ndarray
-            Agents should have the columns:
-            [id, fitness, informed, demand_function_params...] 
-        """
+    def __call__(self,  nn_learners: jnp.ndarray, params, informed: bool) -> jnp.ndarray:
+        
+        agents = self.agents
         X_train, y_train = self._prepare_training_data(agents)
         for i in range(len(agents)):
             agent = agents[i]
             if self.models.get(agent[0], False):
-                model = self._load_model(agent[0])
+                model:  tf.keras.Model = self._load_model(agent[0])
                 model_info = self.models[agent[0]]
                 model.compile(optimizer=model_info['optimizer'], loss=model_info['loss'])
                 model.fit(X_train, y_train, epochs=model_info['epochs'])
@@ -67,4 +73,4 @@ class NeuralNetwork:
                 optimal_input[0] = jnp.round(optimal_input[0], 0)
                 agents[nn_learners][2:] = jnp.array(optimal_input)
 
-        return agents
+        return nn_learners
