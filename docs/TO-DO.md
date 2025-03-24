@@ -13,5 +13,8 @@
 - [x] Revisit Market class typing, dataclass doesn't allow immutable types?
 - [ ] Update Jax implementation
 - [ ] Refactor neural network to instead learn best trades, then estimate the decision rule that leads to these trades.
+- [ ] Refactor so that functions are split into multiple smaller functions, handle logic to determine which function to call in main function, then direct subsets to each relevant function that can be JIT compiled
 - [ ] Add ability to add custom demand functions similar to mlflow pyfunc wrappers.
 	- [ ] ABC class
+- [ ] Create new entity for trades.
+- [ ] Vectorize get_trades()

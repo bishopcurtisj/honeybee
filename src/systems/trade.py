@@ -96,9 +96,23 @@ class OrderBook:
 
         return order
     
-    def get_trades(self):
+    def get_agent_trades(self):
 
         for key in self.agent_trades.keys():
             self.agent_trades[key] = jnp.array(self.agent_trades[key])
 
         return self.agent_trades
+    
+    ## Vectorize this later
+    def get_trades(self):
+        """
+        Get all trades in the order book 
+        Trades has the form:
+        [[quantity, price], [quantity, price], ...]  
+        """
+        trades = []
+        for agent_trades in self.agent_trades.values():
+            for trade in agent_trades:
+                trades.append(trade)
+
+        return jnp.array(trades)

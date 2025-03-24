@@ -30,20 +30,31 @@
 
 # Learning.py
 
-*This is redundant now that I've split the learning algorithms into separate files, need to move the controller logic into Experiment.trade()*
+	Handles the instantiation and registration of learning functions
 
-	Contains the implementations of possible learning functions for agents
+## Models
 
-### Options
- - Genetic Algorithm
- - ==Thompson Sampling==
-	 - ==Takes a draw from binomial to determine informed status==
-	 - ==Takes draw from Demand functions==
-	 - ==Takes draw from prior distribution over demand function parameters==
- - Neural Network
-	Neural Network fits relationship between agent characteristics and fitness, then uses ascent algorithm to find the inputs that lead to the highest fitness.
-	- To prevent storing all of the parameters in memory, need to write and load from pickl files 
-	- Need to revisit ascent algorithm
+### Models.py
+
+Contains abstract class to allow custom learning functions to be written
+
+### Genetic Algorithm
+### Thompson Sampling
+
+Agent takes a draw from subjective belief probability distribution for relevant parameters. Then updates their beliefs using Bayes rule. Agent uses binomial distribution to determine whether they should purchase information, a normal distribution for prices, and a geometric for quantity demanded at a given price.
+
+Probability Distribution structures:
+- Binomial(p = the agents belief that being informed is the optimal choice)
+- Normal(mean, sd)
+- Geometric(p = f(price) where f is a function that converts the price into a probability that a unit of the asset should be purchased.)
+
+#### TODO 
+- [ ] Set up updating rule
+- [ ] Figure out logic for converting price to probability.
+### Neural Network
+
+Agent observes the trades that lead to the highest return, then uses a neural network to estimate the decision rule that leads to the optimal trades. 
+The neural network is given trade prices and quantities as inputs, and the utility of the trade. Then it learns to predict the utility given the trade price and quantity. During trading this agent uses these predictions to make trades whose predicted utility is above their risk aversion threshold.
 
 ### To do 
 - Need to add new learning algorithm's
