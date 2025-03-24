@@ -5,9 +5,11 @@ import tensorflow as tf
 import scipy.optimize as opt
 
 from entities.agent import AgentInfo
+from entities.trades import calculate_trade_utility
+from systems.models.model import Model
 
 
-class NeuralNetwork:
+class NeuralNetwork(Model):
 
     """
     agents: jnp.ndarray
@@ -26,7 +28,6 @@ class NeuralNetwork:
             self.models[agent[components.agent_id]]['path'] = path
 
         
-    ## Right now assumes informed agents exist
     def _build_model(self, params) -> tf.keras.Model:
         input_shape, hidden_layers, hidden_nodes = params
         inputs = tf.keras.Input(shape=(input_shape,))
@@ -43,18 +44,20 @@ class NeuralNetwork:
     def _load_model(self, agent_id: int) -> dict:
         return pickle.loads(self.model_paths[agent_id]['path'])
 
-    def _reward(self, optimal_input, model) -> jnp.ndarray:
-        ## maximize utility / minimize negative utility
-        return -1 * self.model.predict(optimal_input)
+    # def _reward(self, optimal_input, model) -> jnp.ndarray:
+    #     ## maximize utility / minimize negative utility
+    #     return -1 * self.model.predict(optimal_input)
 
-    def _prepare_training_data(self, agents) -> jnp.ndarray:
-        inputs = agents[:, 2:]
-        outputs = agents[:, 1]
-        return inputs, outputs
+    def _prepare_training_data(self, trades: jnp.ndarray, util_func: int) -> jnp.ndarray:
+        outputs = calculate_trade_utility(trades, util_func)
+        return trades, outputs
 
     def __call__(self,  nn_learners: jnp.ndarray, params, informed: bool) -> jnp.ndarray:
         
         agents = self.agents
+        ## Need to decide a better way to let this see the trades.
+        trades = params[0,0]
+        
         X_train, y_train = self._prepare_training_data(agents)
         for i in range(len(agents)):
             agent = agents[i]

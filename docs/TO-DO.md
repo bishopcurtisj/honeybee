@@ -6,15 +6,23 @@
 - [x] Refactor
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by regerence isn't allowing for the changes to agents by the controller to be reflected in the experiment.
+## High Level
 - [ ] Move away from Routledge assumptions, since they are too restrictive.
     - [ ] Add new learning algorithm's and agent functions
     - [x] Revisit market price calculation
 - [x] Revisit fitness calculation to see why I'm getting 0's nan's and inf's
 - [x] Revisit Market class typing, dataclass doesn't allow immutable types?
 - [ ] Update Jax implementation
-- [ ] Refactor neural network to instead learn best trades, then estimate the decision rule that leads to these trades.
-- [ ] Refactor so that functions are split into multiple smaller functions, handle logic to determine which function to call in main function, then direct subsets to each relevant function that can be JIT compiled
+- [ ]  Refactor so that functions are split into multiple smaller functions, handle logic to determine which function to call in main function, then direct subsets to each relevant function that can be JIT compiled
 - [ ] Add ability to add custom demand functions similar to mlflow pyfunc wrappers.
 	- [ ] ABC class
+## Models
+
+- [ ] Refactor neural network to instead learn best trades, then estimate the decision rule that leads to these trades.
+- [ ] Fix fitness calculations!!!!!
+- [ ] Determine how to approach arguments being passed to each function, some depend on the agent (params), some are experiment wide (trades, crossover/mutation rate)
 - [ ] Create new entity for trades.
+	- [ ] Track and append trades from each repetition
 - [ ] Vectorize get_trades()
+- [ ] Calculate fitness for each trade.
+	- [ ] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?

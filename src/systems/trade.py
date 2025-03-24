@@ -115,4 +115,4 @@ class OrderBook:
             for trade in agent_trades:
                 trades.append(trade)
 
-        return jnp.array(trades)
+        return trades

@@ -73,7 +73,8 @@ class Experiment:
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
         self.get_agent_spread()
         agent_ids = traders[:, self.components.id]
-        trades = jnp.zeros((len(self.agents), repetitions, 2))
+        total_agent_trades = jnp.zeros((len(self.agents), repetitions, 2))
+        self.trades = []
 
         for repetition in range(repetitions):
             trade_order = jnp.random.permutation(agent_ids)
@@ -81,12 +82,15 @@ class Experiment:
                 self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.bid], self.agents[agent_id, self.components.bid_quantity])
                 self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.ask], self.agents[agent_id, self.components.ask_quantity])
             agent_trades = self.market.order_book.get_trades()
+            self.trades += self.market.order_book.get_trades()
+
             for agent_id in agent_ids:
                 if agent_id in agent_trades.keys():
-                    trades[agent_id, repetition] = np.array(agent_trades[agent_id][:,0].sum(), np.sum(agent_trades[agent_id][:,1]*agent_trades[agent_id][:,0]))
+                    total_agent_trades[agent_id, repetition] = np.array(agent_trades[agent_id][:,0].sum(), np.sum(agent_trades[agent_id][:,1]*agent_trades[agent_id][:,0]))
             self.market.order_book.reset()
-                
-        return trades
+
+        self.trades = jnp.array(self.trades)
+        return total_agent_trades
 
     def calculate_agent_fitness(self, repetitions: int, trades: jnp.ndarray):
         traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
