@@ -14,5 +14,5 @@ class Model(ABC):
         pass
 
     @abstractmethod
-    def __call__(self, agents: jnp.ndarray, params: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
+    def __call__(self, agents: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
         pass
