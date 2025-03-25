@@ -1,8 +1,7 @@
 from dataclasses import dataclass
 import numpy as jnp
-from typing import Protocol
-
-GAMMA_CONSTANTS = [1,1]
+from abc import ABC, abstractmethod
+from typing import List, Union
 
 
 class AgentInfo:
@@ -59,42 +58,94 @@ class AgentInfo:
         return iter(self._columns)
 
 ## Utility function for agents to determine how much they value gains relative to risk
-class Utility(Protocol):
-    def __call__(self) -> float:
+class Utility(ABC):
+
+    label: str
+    @abstractmethod
+    def __call__(*args, **kwargs) -> float:
         ...
 
-@dataclass(frozen=True, kw_only=True, slots=True)
-class Const_abs_risk_aversion:
+class Const_abs_risk_aversion(Utility):
 
-    def __call__(self, risk_aversion: float, returns: float) -> float:
+    label = "Const_abs_risk_aversion"
+    @staticmethod
+    def __call__(risk_aversion: float, returns: float) -> float:
         return -jnp.exp(-risk_aversion * returns)
 
 
 ## Demand function for agents to determine how much of a good to buy
-class Demand(Protocol):
-    def __call__(self) -> float:
+class Demand(ABC):
+
+    label: str
+    @abstractmethod
+    def __call__(*args, **kwargs) -> float:
         ...
 
-@dataclass(frozen=True, kw_only=True, slots=True)
-class GS_linear:
+class GS_linear(Demand):
+    label = "GS_linear"
     ## If uninformed signal == price
-    def __call__(self, price: float, coeffs: jnp.ndarray, signal, scaling_factor: float = None) -> float:
+    @staticmethod
+    def __call__(price: float, coeffs: jnp.ndarray, signal, scaling_factor: float = None) -> float:
         return scaling_factor * (coeffs[0] + coeffs[1] * signal - price)
 
 
 ## Objective function for learning algorithm to maximize
-class Objective(Protocol):
-    def __call__(self) -> float:
+class Objective(ABC):
+    label: str
+    @abstractmethod
+    def __call__(*args, **kwargs) -> float:
         ...
 
-@dataclass(frozen=True, kw_only=True, slots=True)
-class Mean_variance:
+class Mean_variance(Objective):
+    label = "Mean_variance"
 
-    def __call__(self, returns: float, risk_aversion: float) -> float:
+    @staticmethod
+    def __call__(returns: float, risk_aversion: float) -> float:
         return jnp.mean(returns) - jnp.var(returns)*risk_aversion/2
+    
+class Spread(ABC):
+    label: str
+    @abstractmethod
+    def __call__(*args, **kwargs) -> float:
+        ...
+
+class LinearDemandSpread(Spread):
+    label = "LinearDemandSpread"
+    @staticmethod
+    def __call__() -> float:
+        return 0.01
 
 
 UTILITY_REGISTRY = {1: Const_abs_risk_aversion}
 DEMAND_REGISTRY = {1: GS_linear}
 OBJECTIVE_REGISTRY = {1: Mean_variance}
 
+def register_utility_function(id: int, utility_functions: Union[List[Utility], Utility]):
+    if type(utility_functions) == Utility:
+        utility_functions = [utility_functions]
+    for utility_function in utility_functions:
+        try:
+            assert issubclass(utility_function, Utility)
+        except AssertionError:
+            raise ValueError(f"Custom utility function {utility_function.label} must be a subclass of Utility")
+        UTILITY_REGISTRY[id] = utility_function
+    
+def register_demand_function(id: int, demand_functions: Union[List[Demand], Demand]):
+    if type(demand_functions) == Demand:
+        demand_functions = [demand_functions]
+    for demand_function in demand_functions:
+        try:
+            assert issubclass(demand_function, Demand)
+        except AssertionError:
+            raise ValueError(f"Custom demand function {demand_function.label} must be a subclass of Demand")
+        DEMAND_REGISTRY[id] = demand_function
+
+def register_objective_function(id: int, objective_functions: Union[List[Objective], Objective]):
+    if type(objective_functions) == Objective:
+        objective_functions = [objective_functions]
+    for objective_function in objective_functions:  
+        try:
+            assert issubclass(objective_function, Objective)
+        except AssertionError:
+            raise ValueError(f"Custom objective function {objective_function.label} must be a subclass of Objective")
+        OBJECTIVE_REGISTRY[id] = objective_function

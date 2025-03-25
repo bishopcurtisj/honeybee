@@ -1,27 +1,23 @@
 import numpy as jnp
 import numpy.random as random
 
+from ACE_Experiment.globals import globals, config
 from systems.models.model import Model
     
 class GeneticAlgorithm(Model):
 
-    def __init__(self, agents: jnp.ndarray, components: jnp.ndarray):
+    def __init__(self, agents: jnp.ndarray):
         self.pop_size = len(agents)
-        self.crossover_rate = agents[0][components.learning_params[0]]
-        self.mutation_rate = agents[0][components.learning_params[1]]
-
-    
-
-
-    def __call__(self, agents: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
+        
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
         """ 
         Genetic Algorithm function to be used in the learning system
         Takes subset of agents with columns:
         [fitness, informed, demand_function_params...]
         """
-        if self.crossover_rate is None or self.mutation_rate is None:
+        if config.crossover_rate is None or config.mutation_rate is None:
             raise ValueError("Genetic Algorithm requires  crossover_rate and mutation_rate to be set.")
-        if informed:
+        if globals.informed:
             return self.informed_agents(agents)
         else:
             return self.uninformed_agents(agents)
@@ -50,7 +46,7 @@ class GeneticAlgorithm(Model):
                 parent2 = self.select_individual(total_fitness=total_fitness, agents=agents, fitnesses=adjusted_fitnesses)[1:]
 
                 # Perform crossover with some probability
-                if random.random() < self.crossover_rate:
+                if random.random() < config.crossover_rate:
                     child1 = jnp.concatenate([parent1[:crossover_point], parent2[crossover_point:]])
                     child2 = jnp.concatenate([parent2[:crossover_point], parent1[crossover_point:]])
                 else:
@@ -58,9 +54,9 @@ class GeneticAlgorithm(Model):
                     child1, child2 = parent1, parent2
                 
                 # Mutation step: slightly perturb some offspring
-                if random.uniform(0, 1) < self.mutation_rate:
+                if random.uniform(0, 1) < config.mutation_rate:
                     child1[1:] += random.standard_normal(params-1)  # add small random noise
-                if random.uniform(0, 1) < self.mutation_rate:
+                if random.uniform(0, 1) < config.mutation_rate:
                     child2[1:] += random.standard_normal(params-1)  # add small random noise
 
                 new_population[i, 1:] = child1
@@ -102,9 +98,9 @@ class GeneticAlgorithm(Model):
                     child1, child2 = parent1, parent2
                 
                 
-                if random.uniform(0, 1) < self.mutation_rate:
+                if random.uniform(0, 1) < config.mutation_rate:
                     child1 += random.standard_normal(params)  # add small random noise
-                if random.uniform(0, 1) < self.mutation_rate:
+                if random.uniform(0, 1) < config.mutation_rate:
                     child2 += random.standard_normal(params)  # add small random noise
 
                 new_population[i, 1:] = child1
