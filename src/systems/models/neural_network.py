@@ -4,6 +4,7 @@ import numpy as jnp
 import tensorflow as tf
 import scipy.optimize as opt
 
+from ACE_Experiment.globals import globals
 from entities.agent import AgentInfo
 from entities.trades import calculate_trade_utility
 from systems.models.model import Model
@@ -17,15 +18,15 @@ class NeuralNetwork(Model):
         [id, fitness, informed, demand_function_params...] 
     """
 
-    def __init__(self, agents: jnp.ndarray, components: AgentInfo):
+    def __init__(self, agents: jnp.ndarray):
         self.models = {}
         self.agents = agents
         for agent in agents:
-            self.models[agent[components.agent_id]] = {}
-            self.models[agent[components.agent_id]]['input_shape', 'hidden_layers', 'hidden_nodes', 'demand_fx_params', 'optimizer', 'epochs', 'loss', 'optimization_steps', 'learning_rate'] = agent[components.learning_params]
-            model = self._build_model(self.models[agent[components.agent_id]]['input_shape', 'hidden_layers', 'hidden_nodes', 'demand_fx_params'].values())
+            self.models[agent[globals.components.agent_id]] = {}
+            self.models[agent[globals.components.agent_id]]['input_shape', 'hidden_layers', 'hidden_nodes', 'demand_fx_params', 'optimizer', 'epochs', 'loss', 'optimization_steps', 'learning_rate'] = agent[globals.components.learning_params]
+            model = self._build_model(self.models[agent[globals.components.agent_id]]['input_shape', 'hidden_layers', 'hidden_nodes', 'demand_fx_params'].values())
             path = pickle.dumps(model)
-            self.models[agent[components.agent_id]]['path'] = path
+            self.models[agent[globals.components.agent_id]]['path'] = path
 
         
     def _build_model(self, params) -> tf.keras.Model:
@@ -45,19 +46,19 @@ class NeuralNetwork(Model):
         return pickle.loads(self.model_paths[agent_id]['path'])
 
 
-    def _prepare_training_data(self, trades: jnp.ndarray, util_func: int) -> jnp.ndarray:
-        outputs = calculate_trade_utility(trades, util_func)
-        return trades, outputs
+    def _prepare_training_data(self, util_func: int) -> jnp.ndarray:
+        outputs = calculate_trade_utility(globals.trades, util_func)
+        return globals.trades, outputs
 
     def __call__(self,  nn_learners: jnp.ndarray, params) -> jnp.ndarray:
         
         agents = self.agents
         ## Need to decide a better way to let this see the trades.
-        trades = params[0,0]
         
-        X_train, y_train = self._prepare_training_data(agents)
+        
         for i in range(len(agents)):
             agent = agents[i]
+            X_train, y_train = self._prepare_training_data(agent[globals.components.demand_fx_params[0]])
             if self.models.get(agent[0], False):
                 model:  tf.keras.Model = self._load_model(agent[0])
                 model_info = self.models[agent[0]]

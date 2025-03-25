@@ -6,15 +6,15 @@ from systems.models.model import Model
     
 class GeneticAlgorithm(Model):
 
-    def __init__(self, agents: jnp.ndarray, components: jnp.ndarray):
+    def __init__(self, agents: jnp.ndarray):
         self.pop_size = len(agents)
-        self.crossover_rate = agents[0][components.learning_params[0]]
-        self.mutation_rate = agents[0][components.learning_params[1]]
+        self.crossover_rate = agents[0][globals.components.learning_params[0]]
+        self.mutation_rate = agents[0][globals.components.learning_params[1]]
 
     
 
 
-    def __call__(self, agents: jnp.ndarraye) -> jnp.ndarray:
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
         """ 
         Genetic Algorithm function to be used in the learning system
         Takes subset of agents with columns:
