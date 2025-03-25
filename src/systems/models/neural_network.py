@@ -44,15 +44,12 @@ class NeuralNetwork(Model):
     def _load_model(self, agent_id: int) -> dict:
         return pickle.loads(self.model_paths[agent_id]['path'])
 
-    # def _reward(self, optimal_input, model) -> jnp.ndarray:
-    #     ## maximize utility / minimize negative utility
-    #     return -1 * self.model.predict(optimal_input)
 
     def _prepare_training_data(self, trades: jnp.ndarray, util_func: int) -> jnp.ndarray:
         outputs = calculate_trade_utility(trades, util_func)
         return trades, outputs
 
-    def __call__(self,  nn_learners: jnp.ndarray, params, informed: bool) -> jnp.ndarray:
+    def __call__(self,  nn_learners: jnp.ndarray, params) -> jnp.ndarray:
         
         agents = self.agents
         ## Need to decide a better way to let this see the trades.

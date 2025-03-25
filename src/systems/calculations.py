@@ -1,5 +1,6 @@
 import numpy as jnp
 
+from ACE_Experiment.globals import globals
 from entities.agent import *
 from entities.market import Market
 from systems.trade import *
@@ -7,7 +8,7 @@ from systems.trade import *
 GAMMA_CONSTANTS = [1,1]
 
 
-def calculate_spread(agents: jnp.ndarray,max_price: float, informed: bool = True) -> jnp.ndarray:
+def calculate_spread(agents: jnp.ndarray,max_price: float) -> jnp.ndarray:
     """
     Calculate the bid-ask spread of a set of agents
     agents should have the following columns:
@@ -16,7 +17,7 @@ def calculate_spread(agents: jnp.ndarray,max_price: float, informed: bool = True
     min_price = 0
     price = (max_price + min_price) / 2
 
-    if informed:
+    if globals.informed:
         for i in range(len(agents)):
             df = DEMAND_REGISTRY[int(agents[i,6])]()
             demand = df(price, agents[i,8:], agents[i,1], GAMMA_CONSTANTS[int(agents[i,0])])
@@ -55,12 +56,12 @@ def calculate_spread(agents: jnp.ndarray,max_price: float, informed: bool = True
     
 
 
-def calculate_fitness(agents: jnp.ndarray, repetitions: int, trades: jnp.ndarray, risk_aversion: jnp.ndarray, market: Market, informed: bool = True) -> jnp.ndarray:
+def calculate_fitness(agents: jnp.ndarray, repetitions: int, trades: jnp.ndarray, risk_aversion: jnp.ndarray, market: Market) -> jnp.ndarray:
     """
     Calculate the fitness of a set of agents
     agents should have the following columns:
     [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
-    returns = calculate_returns(agents, market, repetitions, trades, informed)
+    returns = calculate_returns(agents, market, repetitions, trades)
     utilities = calculate_utility(agents, returns, risk_aversion)
     
     for i in range(len(agents)):
@@ -71,7 +72,7 @@ def calculate_fitness(agents: jnp.ndarray, repetitions: int, trades: jnp.ndarray
  
 
 
-def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, trades: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
+def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, trades: jnp.ndarray) -> jnp.ndarray:
     """
     Calculate the returns of a set of agents
     agents should have the following columns:
@@ -80,7 +81,7 @@ def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, trad
     [quantity, total spendings]
     """
 
-    if informed:
+    if globals.informed:
         returns = trades[:, 0] * market.dividends[repetition] - trades[:,1] - market.cost_of_info * agents[:,0]
     else:
         returns = trades[:, 0] * market.dividends[repetition] - trades[:,1]

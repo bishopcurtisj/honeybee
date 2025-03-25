@@ -5,6 +5,7 @@ import numpy as np
 
 from entities.agent import AgentInfo
 from entities.market import Market
+from ACE_Experiment.globals import globals
 from systems.calculations import *
 from systems.learning import model_controller
 
@@ -16,17 +17,19 @@ class Experiment:
         
         with open(agents_file_path) as f:
             self.headers = f.readline().strip().split(',')
-        self.agents = np.loadtxt(agents_file_path, delimiter=',', skiprows=1)
-        self.market = market
-        self.components = AgentInfo(self.headers)
+        globals.agents = np.loadtxt(agents_file_path, delimiter=',', skiprows=1)
+        globals.market = market
+        globals.components = AgentInfo(self.headers)
         
-        if 'informed' in self.components.keys():
-            self.agents[:, self.components.signal] = jnp.where(self.agents[:, self.components.informed] == 0, self.market.price, self.market.signal[0])
+        if 'informed' in globals.components.keys():
+            globals.agents[:, globals.components.signal] = jnp.where(globals.agents[:, globals.components.informed] == 0, globals.market.price, globals.market.signal[0])
+            globals.informed = True
         else:
-            self.components.add('informed', None)
+            globals.components.add('informed', None)
+            globals.informed = False
         
 
-        model_controller.init_models(self.agents, self.components)
+        model_controller.init_models(globals.agents, globals.components)
         
 
 
@@ -40,96 +43,94 @@ class Experiment:
             self.trade()
         
         self.save()
-        return self.agents
+        return globals.agents
 
     def save(self):
 
-        np.savetxt("results.csv", self.agents, delimiter=",", fmt="%.2f", header=",".join(self.headers), comments='')
+        np.savetxt("results.csv", globals.agents, delimiter=",", fmt="%.2f", header=",".join(self.headers), comments='')
 
 
     def learn(self):
-        if self.components.informed == None:
-            columns = jnp.array([self.components.fitness]+self.components.demand_fx_params)
-            informed = False
+        if globals.informed == False:
+            columns = jnp.array([globals.components.fitness]+globals.components.demand_fx_params)
+
         else:
-            informed = True
-            columns = jnp.array([self.components.fitness, self.components.informed] + self.components.demand_fx_params)
 
-        params = self.agents[:, jnp.array(self.components.learning_params)]
-        subset = self.agents[:, columns]   
+            columns = jnp.array([globals.components.fitness, globals.components.informed] + globals.components.demand_fx_params)
 
-        subset = model_controller.learn(subset, params, informed)
+        params = globals.agents[:, jnp.array(globals.components.learning_params)]
+        subset = globals.agents[:, columns]   
 
-        self.agents[:, columns] = subset
-        self.market.new_period()
+        subset = model_controller.learn(subset, params)
+
+        globals.agents[:, columns] = subset
+        globals.market.new_period()
 
         ## Update signal        
-        if self.components.informed != None:
-            self.agents[:,self.components.signal] = jnp.where(self.agents[:, self.components.informed]== 0, self.market.price, self.market.signal[0])
+        if globals.components.informed != None:
+            globals.agents[:,globals.components.signal] = jnp.where(globals.agents[:, globals.components.informed]== 0, globals.market.price, globals.market.signal[0])
 
 
 ## Refactor to vectorize
     def trade(self, repetitions: int):
-        traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
+        traders = jnp.where(globals.agents[:,globals.components.agent_type] == 0)[0]
         self.get_agent_spread()
-        agent_ids = traders[:, self.components.id]
-        total_agent_trades = jnp.zeros((len(self.agents), repetitions, 2))
-        self.trades = []
+        agent_ids = traders[:, globals.components.id]
+        total_agent_trades = jnp.zeros((len(globals.agents), repetitions, 2))
+        trades = []
 
         for repetition in range(repetitions):
             trade_order = jnp.random.permutation(agent_ids)
             for agent_id in trade_order:
-                self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.bid], self.agents[agent_id, self.components.bid_quantity])
-                self.market.order_book.add_order(agent_id, self.agents[agent_id, self.components.ask], self.agents[agent_id, self.components.ask_quantity])
-            agent_trades = self.market.order_book.get_trades()
-            self.trades += self.market.order_book.get_trades()
+                globals.market.order_book.add_order(agent_id, globals.agents[agent_id, globals.components.bid], globals.agents[agent_id, globals.components.bid_quantity])
+                globals.market.order_book.add_order(agent_id, globals.agents[agent_id, globals.components.ask], globals.agents[agent_id, globals.components.ask_quantity])
+            agent_trades = globals.market.order_book.get_trades()
+            trades += globals.market.order_book.get_trades()
 
             for agent_id in agent_ids:
                 if agent_id in agent_trades.keys():
                     total_agent_trades[agent_id, repetition] = np.array(agent_trades[agent_id][:,0].sum(), np.sum(agent_trades[agent_id][:,1]*agent_trades[agent_id][:,0]))
-            self.market.order_book.reset()
+            globals.market.order_book.reset()
 
-        self.trades = jnp.array(self.trades)
+        globals.trades = jnp.array(trades)
         return total_agent_trades
 
     def calculate_agent_fitness(self, repetitions: int, trades: jnp.ndarray):
-        traders = jnp.where(self.agents[:,self.components.agent_type] == 0)[0]
-        if self.components.informed == None:
-            columns = np.array([self.components.fitness, self.components.objective_function, self.components.utility_function, self.components.demand, self.components.demand_function] + self.components['demand_function']['parameter_idxs'])
-            informed = False
+        traders = jnp.where(globals.agents[:,globals.components.agent_type] == 0)[0]
+        if globals.informed == False:
+            columns = np.array([globals.components.fitness, globals.components.objective_function, globals.components.utility_function, globals.components.demand, globals.components.demand_function] + globals.components['demand_function']['parameter_idxs'])
         else:
-            informed = True
-            columns = np.array([self.components.fitness, self.components.objective_function, self.components.utility_function, self.components.informed ,self.components.signal ,self.components.demand, self.components.demand_function] + self.components.demand_fx_params)
-        subset = self.agents[traders][:, columns]  # Corrected indexing
+            columns = np.array([globals.components.fitness, globals.components.objective_function, globals.components.utility_function, globals.components.informed ,globals.components.signal ,globals.components.demand, globals.components.demand_function] + globals.components.demand_fx_params)
+        subset = globals.agents[traders][:, columns]  # Corrected indexing
         
-        subset = calculate_fitness(subset, repetitions, trades, self.agents[traders][:, self.components.risk_aversion], self.market, informed)
-        self.agents[traders[:, None], columns] = subset
+        subset = calculate_fitness(subset, repetitions, trades, globals.agents[traders][:, globals.components.risk_aversion], globals.market)
+        globals.agents[traders[:, None], columns] = subset
 
     def get_agent_spread(self):
         """
         Calculate the bid-ask spread of the agents
         """
-        traders = jnp.where(self.agents[:, self.components.agent_type] == 0)[0]  # Extract the first element of the tuple
+        traders = jnp.where(globals.agents[:, globals.components.agent_type] == 0)[0]  # Extract the first element of the tuple
         
-        if self.components.informed == None:
+        if globals.components.informed == None:
             # Correctly concatenate lists before converting to jnp.array
-            columns = jnp.array([self.components.bid, self.components.ask, self.components.bid_quantity, self.components.ask_quantity, self.components.demand_function, self.components.confidence] + self.components.demand_fx_params)
+            columns = jnp.array([globals.components.bid, globals.components.ask, globals.components.bid_quantity, globals.components.ask_quantity, globals.components.demand_function, globals.components.confidence] + globals.components.demand_fx_params)
             informed = False
         else:
             informed = True
             columns = jnp.array(
-                [self.components.informed, self.components.signal, self.components.bid, self.components.ask, self.components.bid_quantity, self.components.ask_quantity, self.components.demand_function, self.components.confidence] + 
-                self.components.demand_fx_params
+                [globals.components.informed, globals.components.signal, globals.components.bid, globals.components.ask, globals.components.bid_quantity, globals.components.ask_quantity, globals.components.demand_function, globals.components.confidence] + 
+                globals.components.demand_fx_params
             )
 
         # Correct the way traders and columns are used
-        subset = self.agents[traders][:, columns]  # Corrected indexing
+        subset = globals.agents[traders][:, columns]  # Corrected indexing
         
         # Update demand function
-        subset = self.update_demands(self.market.price, subset, informed)
+        subset = self.update_demands(globals.market.price, subset, informed)
         
         # Store updated values back in agents array
-        self.agents[traders[:, None], columns] = subset
+        globals.agents[traders[:, None], columns] = subset
 
     def update_demands():
         pass

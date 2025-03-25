@@ -1,6 +1,7 @@
 import numpy as jnp
 import numpy.random as random
 
+from ACE_Experiment.globals import globals
 from systems.models.model import Model
     
 class GeneticAlgorithm(Model):
@@ -13,7 +14,7 @@ class GeneticAlgorithm(Model):
     
 
 
-    def __call__(self, agents: jnp.ndarray, informed: bool = True) -> jnp.ndarray:
+    def __call__(self, agents: jnp.ndarraye) -> jnp.ndarray:
         """ 
         Genetic Algorithm function to be used in the learning system
         Takes subset of agents with columns:
@@ -21,7 +22,7 @@ class GeneticAlgorithm(Model):
         """
         if self.crossover_rate is None or self.mutation_rate is None:
             raise ValueError("Genetic Algorithm requires  crossover_rate and mutation_rate to be set.")
-        if informed:
+        if globals.informed:
             return self.informed_agents(agents)
         else:
             return self.uninformed_agents(agents)

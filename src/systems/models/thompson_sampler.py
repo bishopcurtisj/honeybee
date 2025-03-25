@@ -1,14 +1,16 @@
 import numpy as jnp
 
+from ACE_Experiment.globals import globals
 
-def thompson_sampler(agents: jnp.ndarray, params: jnp.ndarray, informed: bool) -> jnp.ndarray:
+
+def thompson_sampler(agents: jnp.ndarray, params: jnp.ndarray) -> jnp.ndarray:
     """
     Agents should have the columns:
     ['fitness', 'informed', 'demand_fx_params...']
     Params should have the prior distribution and likelihood function for each demand function parameter
     """
 
-    if informed:
+    if globals.informed:
 
         return informed_thompson(agents, params)
     else:
