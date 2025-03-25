@@ -4,7 +4,11 @@ Memory vs performance.
 flag?
 
 Should I create a models entity?
-Should I create classes for the data arrays, then instantiate a unique object that can be imported into each module
+
+
+****
+
+
 
 
 ### Limit order book vs Intersecting demand/supply
