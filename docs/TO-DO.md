@@ -31,13 +31,14 @@
 - [x] Calculate utility for each trade.
 	- [ ] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?
 
-### Thompson Sampler
-
+### Bayesians
 - [x] Before Thompson Sampler and BUCB need to implement a vanilla subjective Bayesian
 
-
-- [ ] Need to refactor calculations to change from one-size fits all approach
+- [ ] Implement ability for bayesians to be informed
+	-  This requires me to decide on whether information should be an incremental function or single purchase.
+- [x] Need to refactor calculations to change from one-size fits all approach
 - [ ] Need a function to determine behavior for current market (Where should this go?)
 	- [x] New spread function
 	- [x] New Demand function
-- [ ] Need to implement updating function
+- [x] Need to implement updating function
+- [ ] Implement logic for when multiple agents are passed to BayesianDemand
