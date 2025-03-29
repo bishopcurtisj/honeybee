@@ -106,12 +106,14 @@ class BayesianDemand(Demand):
     
     label = "BayesianDemand"
     @staticmethod
-    def __call__(price: float, bid: bool, params: jnp.ndarray, key = None) -> float:
-        prob = (price - params[0]) / params[1]
-        if bid:
-            return geometric(key,1 - prob)
-        else:
-            return geometric(key, prob)
+    def __call__(price: Union[float, jnp.ndarray], bid: bool, params: jnp.ndarray, key = None) -> float:
+        if type(price) == float:
+            prob = (price - params[0]) / params[1]
+            if bid:
+                return geometric(key,1 - prob)
+            else:
+                return geometric(key, prob)
+        ## Implement logic for when multiple agents are passed
 
 
 
