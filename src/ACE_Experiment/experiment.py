@@ -3,10 +3,9 @@ import json
 import numpy as jnp
 import numpy as np
 
-from entities.agent import AgentInfo
+from entities.agent import AgentInfo, calculate_fitness
 from entities.market import Market
 from ACE_Experiment.globals import globals, config
-from systems.calculations import *
 from systems.learning import model_controller
 
 
@@ -117,9 +116,7 @@ class Experiment:
         if globals.components.informed == None:
             # Correctly concatenate lists before converting to jnp.array
             columns = jnp.array([globals.components.bid, globals.components.ask, globals.components.bid_quantity, globals.components.ask_quantity, globals.components.demand_function, globals.components.confidence] + globals.components.demand_fx_params)
-            informed = False
         else:
-            informed = True
             columns = jnp.array(
                 [globals.components.informed, globals.components.signal, globals.components.bid, globals.components.ask, globals.components.bid_quantity, globals.components.ask_quantity, globals.components.demand_function, globals.components.confidence] + 
                 globals.components.demand_fx_params
