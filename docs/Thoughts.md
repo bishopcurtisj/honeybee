@@ -5,7 +5,8 @@ flag?
 
 Should I create a models entity?
 
-
+Agents see simulations of trading and then have one round where they trade 
+True rounds are weighted heavier than simulations
 ****
 
 
