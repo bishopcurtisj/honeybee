@@ -4,7 +4,12 @@ Memory vs performance.
 flag?
 
 Should I create a models entity?
-Should I create classes for the data arrays, then instantiate a unique object that can be imported into each module
+
+Agents see simulations of trading and then have one round where they trade 
+True rounds are weighted heavier than simulations
+****
+
+
 
 
 ### Limit order book vs Intersecting demand/supply

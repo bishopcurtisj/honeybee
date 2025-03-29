@@ -15,6 +15,12 @@
 
 	 Contains functions used by Agents such as demand and utility
 
+	Current Agent Types:
+		0: Trader
+			Trader Types:
+					0: Linear Demand
+					1: Bayesian
+
 ### To do 
 - Need to add new demand, utility, and objective function options
 # Market.py
