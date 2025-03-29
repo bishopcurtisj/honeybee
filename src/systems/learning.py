@@ -6,7 +6,7 @@ from ACE_Experiment.globals import globals
 from systems.models.model import Model
 from systems.models.genetic_algorithm import GeneticAlgorithm
 from systems.models.neural_network import NeuralNetwork
-from systems.models.thompson_sampler import thompson_sampler
+from systems.models.bayesian import thompson_sampler
 
 
 

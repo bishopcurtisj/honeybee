@@ -1,16 +1,15 @@
 import numpy as jnp
 import json
 
-from entities.agent import AgentInfo
 from entities.market import Market
 
 
 class Globals:
 
     agents: jnp.ndarray
-    components: AgentInfo
+    components: object
     market: Market
-    trades: jnp.ndarray
+    trades: jnp.ndarray #[quantity, price]
     informed: bool
 
 class Config:
