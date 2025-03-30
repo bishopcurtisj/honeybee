@@ -78,6 +78,7 @@ class OrderBook:
                     self.agent_trades[self.buy_orders[best_bid][0].trader_id].append((order.quantity, best_bid))
                     self.agent_trades[order.trader_id].append((-order.quantity, best_bid))
                     order.quantity = 0
+                self.last_price = best_bid
                 
         else:
             # buy order
@@ -92,7 +93,7 @@ class OrderBook:
                     self.agent_trades[self.sell_orders[best_ask][0].trader_id].append((-order.quantity, best_ask))
                     self.agent_trades[order.trader_id].append((order.quantity, best_ask))
                     order.quantity = 0
-
+                self.last_price = best_ask
 
         return order
     
@@ -113,6 +114,6 @@ class OrderBook:
         trades = []
         for agent_trades in self.agent_trades.values():
             for trade in agent_trades:
-                trades.append(trade)
+                trades.append(jnp.array(trade))
 
         return trades

@@ -1,25 +1,24 @@
 import numpy as jnp
 import json
-
-from entities.market import Market
+from typing import List
 
 
 class Globals:
 
     agents: jnp.ndarray
     components: object
-    market: Market
+    market: object
     trades: jnp.ndarray #[quantity, price]
     informed: bool
 
 class Config:
-    uninformed_base_ratio: float = 0.5
-    mutation_rate: float = 0.1
-    crossover_rate: float = 0.1
+    uninformed_base_ratio: float
+    mutation_rate: float
+    crossover_rate: float
     generations: int
     repetitions: int
-    GAMMA_CONSTANTS = [1,1]
-    max_price: float = 100
+    GAMMA_CONSTANTS: List
+    max_price: float
 
     def from_json(self, json_path: str):
         with open(json_path) as f:

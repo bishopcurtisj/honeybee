@@ -62,26 +62,26 @@ class AgentInfo:
         """Iterate over column names."""
         return iter(self._columns)
 
+
 ## Utility function for agents to determine how much they value gains relative to risk
 class Utility(ABC):
-
     label: str
+    @staticmethod
     @abstractmethod
     def __call__(*args, **kwargs) -> float:
         ...
 
 class Const_abs_risk_aversion(Utility):
-
     label = "Const_abs_risk_aversion"
     @staticmethod
-    def __call__(risk_aversion: float, returns: float) -> float:
+    def __call__(returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
         return -jnp.exp(-risk_aversion * returns)
 
 
 ## Demand function for agents to determine how much of a good to buy
 class Demand(ABC):
-
     label: str
+    @staticmethod
     @abstractmethod
     def __call__(*args, **kwargs) -> float:
         ...
@@ -106,20 +106,19 @@ class BayesianDemand(Demand):
     
     label = "BayesianDemand"
     @staticmethod
-    def __call__(price: Union[float, jnp.ndarray], bid: bool, params: jnp.ndarray, key = None) -> float:
-        if type(price) == float:
-            prob = (price - params[0]) / params[1]
-            if bid:
+    def __call__(price: jnp.ndarray, bid: bool, params: jnp.ndarray, key = None) -> float:
+        prob = (price - params[:, 0]) / params[:, 1]
+
+        if bid:
                 return geometric(key,1 - prob)
-            else:
-                return geometric(key, prob)
-        ## Implement logic for when multiple agents are passed
-
-
+        else:
+            return geometric(key, prob)
+        
 
 ## Objective function for learning algorithm to maximize
 class Objective(ABC):
     label: str
+    @staticmethod
     @abstractmethod
     def __call__(*args, **kwargs) -> float:
         ...
@@ -128,7 +127,7 @@ class Mean_variance(Objective):
     label = "Mean_variance"
 
     @staticmethod
-    def __call__(returns: float, risk_aversion: float) -> float:
+    def __call__(returns: jnp.ndarray, risk_aversion: float) -> float:
         return jnp.mean(returns) - jnp.var(returns)*risk_aversion/2
     
 class Spread(ABC):
@@ -147,7 +146,6 @@ class LinearDemandSpread(Spread):
         [informed, signal, bid, ask, bid_quantity, ask_quantity, demand_function, confidence, demand_function_params...]
         """
         
-
         if globals.informed:
             return LinearDemandSpread._informed_spread(agents)
         else:
@@ -209,21 +207,19 @@ class BayesianSpread(Spread):
         """
         Calculate the bid-ask spread of a set of agents
         agents should have the following columns:
-        [bid, ask, bid_quantity, ask_quantity, demand_function, confidence, demand_function_params...]
+        [informed, signal, bid, ask, bid_quantity, ask_quantity, demand_function, confidence, demand_function_params...]
         """
-        p = agents[:,5] / 2
-        agents[:, 0] = agents[:, 6] + agents[:, 7] * norm.ppf(p)
-        agents[:, 1] = agents[:, 6] + agents[:, 7] * norm.ppf(1-p) 
-        ## Need to refactor to accurately use differnt demand functions
+        p = agents[:,7] / 2
+        agents[:, 2] = agents[:, 8] + agents[:, 9] * norm.ppf(p)
+        agents[:, 3] = agents[:, 8] + agents[:, 9] * norm.ppf(1-p) 
         for i in DEMAND_REGISTRY.keys():
-            same_demand = jnp.where(agents[4]==i)
-            agents[same_demand][2] = DEMAND_REGISTRY[i](agents[same_demand][0], True, agents[same_demand][6:])
-            agents[same_demand][3] = DEMAND_REGISTRY[i](agents[same_demand][0], False, agents[same_demand][6:])
+            same_demand = jnp.where(agents[6]==i)[0]
+            agents[same_demand[:, None]][4] = DEMAND_REGISTRY[i](agents[same_demand][:, 2], True, agents[same_demand][:, 8:])
+            agents[same_demand[:, None]][5] = DEMAND_REGISTRY[i](agents[same_demand][:, 3], False, agents[same_demand][:, 8:])
         return agents
         
 
-
-def register_utility_function(id: int, utility_functions: Union[List[Utility], Utility]):
+def register_utility_function(utility_functions: Union[List[Utility], Utility]):
     if type(utility_functions) == Utility:
         utility_functions = [utility_functions]
     for utility_function in utility_functions:
@@ -231,9 +227,9 @@ def register_utility_function(id: int, utility_functions: Union[List[Utility], U
             assert issubclass(utility_function, Utility)
         except AssertionError:
             raise ValueError(f"Custom utility function {utility_function.label} must be a subclass of Utility")
-        UTILITY_REGISTRY[id] = utility_function
+        UTILITY_REGISTRY[len(UTILITY_REGISTRY)] = utility_function
     
-def register_demand_function(id: int, demand_functions: Union[List[Demand], Demand]):
+def register_demand_function(demand_functions: Union[List[Demand], Demand]):
     if type(demand_functions) == Demand:
         demand_functions = [demand_functions]
     for demand_function in demand_functions:
@@ -241,9 +237,12 @@ def register_demand_function(id: int, demand_functions: Union[List[Demand], Dema
             assert issubclass(demand_function, Demand)
         except AssertionError:
             raise ValueError(f"Custom demand function {demand_function.label} must be a subclass of Demand")
-        DEMAND_REGISTRY[id] = demand_function
+        DEMAND_REGISTRY[len(DEMAND_REGISTRY)] = demand_function
 
-def register_objective_function(id: int, objective_functions: Union[List[Objective], Objective]):
+def register_objective_function(objective_functions: Union[List[Objective], Objective]):
+    """
+    Registers custom objective function's, 
+    """
     if type(objective_functions) == Objective:
         objective_functions = [objective_functions]
     for objective_function in objective_functions:  
@@ -251,57 +250,65 @@ def register_objective_function(id: int, objective_functions: Union[List[Objecti
             assert issubclass(objective_function, Objective)
         except AssertionError:
             raise ValueError(f"Custom objective function {objective_function.label} must be a subclass of Objective")
-        OBJECTIVE_REGISTRY[id] = objective_function
+        OBJECTIVE_REGISTRY[len(OBJECTIVE_REGISTRY)] = objective_function
 
+def register_spread_function(spread_functions: Union[List[Spread], Spread]):
+    """
+    Registers custom spread function's, 
+    """
+    if type(spread_functions) == Spread:
+        spread_functions = [spread_functions]
+    for spread_function in spread_functions:  
+        try:
+            assert issubclass(spread_function, Spread)
+        except AssertionError:
+            raise ValueError(f"Custom spread function {spread_function.label} must be a subclass of Objective")
+        SPREAD_REGISTRY[len(SPREAD_REGISTRY)] = spread_function
 
-
-def calculate_fitness(agents: jnp.ndarray, repetitions: int, trades: jnp.ndarray, risk_aversion: jnp.ndarray, market: Market) -> jnp.ndarray:
+def calculate_fitness(agents: jnp.ndarray,  trades: jnp.ndarray, risk_aversion: jnp.ndarray, market: Market) -> jnp.ndarray:
     """
     Calculate the fitness of a set of agents
     agents should have the following columns:
     [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]"""
-    returns = calculate_returns(agents, market, repetitions, trades)
+    returns = calculate_returns(agents, market, config.repetitions, trades)
     utilities = calculate_utility(agents, returns, risk_aversion)
-    
-    for i in range(len(agents)):
-        objective_function = OBJECTIVE_REGISTRY[int(agents[i,1])]()
-        agents[i, 0] = objective_function(utilities[i], risk_aversion[i])
+
+    for i in OBJECTIVE_REGISTRY.keys():
+        same_objective = jnp.where(agents[:, 1]==i)
+        agents[same_objective[:, None], 0] = OBJECTIVE_REGISTRY[i](utilities, risk_aversion)
 
     return agents
 
-def calculate_returns(agents: jnp.ndarray, market: Market, repetition: int, trades: jnp.ndarray) -> jnp.ndarray:
+# Need to decide the best way to calculate returns, stay with the dividend approach or change to average/last price transacted.
+def calculate_returns(agents: jnp.ndarray, market: Market,  trades: jnp.ndarray) -> jnp.ndarray:
     """
     Calculate the returns of a set of agents
     agents should have the following columns:
     [informed, ...]
-    trades should have the following columns:
-    [quantity, total spendings]
+    trades should have the following shape
+    (Agent, repetition, [quantity, total spendings])
     """
-
-    if globals.informed:
-        returns = trades[:, 0] * market.dividends[repetition] - trades[:,1] - market.cost_of_info * agents[:,0]
-    else:
-        returns = trades[:, 0] * market.dividends[repetition] - trades[:,1]
+    returns = trades[:,:,0] * market.last_price - trades[:,:,1] - market.cost_of_info * agents[:,0]
     return returns
 
-def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
+def calculate_utility(agents: jnp.ndarray, returns: jnp.ndarray, risk_aversion:jnp.ndarray) -> jnp.ndarray:
     """
     Calculate the utility of a set of agents
     agents should have the following columns:
-    [fitness, objective_function, utility_function]
+    [fitness, objective_function, utility_function, risk_aversion]
     returns should have the following columns:
     [returns]
     """
     utilities = jnp.zeros((len(agents), len(returns[0]))) 
 
-    for i in range(len(agents)):
-        utility_function = UTILITY_REGISTRY[int(agents[i,2])]()
-        utilities[i] = utility_function(returns[i], risk_aversion[i])
+    for i in UTILITY_REGISTRY.keys():
+        same_util = jnp.where(agents[:,2]==i)[0]
+        utilities[same_util[:, None]] = UTILITY_REGISTRY[i](returns, risk_aversion)
 
     return utilities
-
 
 
 UTILITY_REGISTRY = {1: Const_abs_risk_aversion}
 DEMAND_REGISTRY = {1: GS_linear, 2: BayesianDemand}
 OBJECTIVE_REGISTRY = {1: Mean_variance}
+SPREAD_REGISTRY = {1:LinearDemandSpread, 2:BayesianSpread}

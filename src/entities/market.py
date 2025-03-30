@@ -1,20 +1,23 @@
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 from systems.trade import OrderBook
+from ACE_Experiment.globals import config, globals
 
 import numpy as np
+import jax.numpy as jnp
 
 
 
 class Market(ABC):
     dividends: np.ndarray 
-    price: float = 0
-    last_period_price: float = 0
-    repetitions: int = 100
-    generations: int = 20
+    price: float = 0.0
+    last_period_price: float = 0.0
+    repetitions: int = config.repetitions
+    generations: int = config.generations
     supply: np.ndarray = np.zeros(repetitions)
     demand_at_p0: float = np.inf
-    
+    last_price: float
+    mean_price: float
 
     @abstractmethod
     def new_period(self):
@@ -24,9 +27,9 @@ class Market(ABC):
 
 class GSOrderMarket(Market):
     order_book: OrderBook = OrderBook()
-    repetitions: int = 1_000
-    generations: int = 5_000
-    cost_of_info: float = 1
+    repetitions: int = config.repetitions
+    generations: int = config.generations
+    cost_of_info: float = 1.0
     supply: np.ndarray = np.abs(np.random.normal(1000, 10, repetitions))
     signal: np.ndarray = np.random.normal(0, 0.0004, repetitions)
     noise: np.ndarray = np.random.normal(0, 0.0004, repetitions)
@@ -34,6 +37,8 @@ class GSOrderMarket(Market):
     beta1: float = 1.0  # arbitary values
     dividends: np.ndarray = beta0 + beta1 * signal + noise
     demand_at_p0: float = np.inf
+    last_price: jnp.ndarray = jnp.zeros(repetitions)
+    mean_price: jnp.ndarray = jnp.zeros(repetitions)
 
     def new_period(self):
         self.last_period_price = self.price
@@ -45,8 +50,8 @@ class GSOrderMarket(Market):
 
 class RoutledgeMarket(Market):
 
-    repetitions: int = 1_000
-    generations: int = 5_000
+    repetitions: int = config.repetitions
+    generations: int = config.generations
     cost_of_info: float = 1
     supply: np.ndarray = np.abs(np.random.normal(1000, 10, repetitions))
     signal: np.ndarray = np.random.normal(0, 0.0004, repetitions)
