@@ -17,9 +17,12 @@
 - [x]  Refactor so that functions are split into multiple smaller functions, handle logic to determine which function to call in main function, then direct subsets to each relevant function that can be JIT compiled
 - [x] Add ability to add custom demand functions similar to mlflow pyfunc wrappers.
 	- [x] ABC class
-- [ ] Fix fitness calculations!!!!!
-	- [ ] This requires me to make a decision on how to calculate profit. what is the "true" value that they are being judged on? Average price or Last price?
-- [ ] Implement experiment.update_demands() and finish implementing get_agent_spread
+- [x] Fix Experiment driver, need to make it consistent across functions over whether they are expected to process a single repetition or all of them.
+- [x] Fix fitness calculations!!!!!
+	- [x] This requires me to make a decision on how to calculate profit. what is the "true" value that they are being judged on? Average price or Last price?
+- [x] Implement experiment.update_demands() and finish implementing get_agent_spread
+- [x] Refactor so that rather than looping over agents, loop over possible demand functions then 
+- [ ] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
 ## Models
 
 - [x] Refactor neural network to instead learn best trades, then estimate the decision rule that leads to these trades.
@@ -41,4 +44,4 @@
 	- [x] New spread function
 	- [x] New Demand function
 - [x] Need to implement updating function
-- [ ] Implement logic for when multiple agents are passed to BayesianDemand
+- [x] Implement logic for when multiple agents are passed to BayesianDemand
