@@ -234,7 +234,7 @@ def register_demand_function(demand_functions: Union[List[Demand], Demand]):
         demand_functions = [demand_functions]
     for demand_function in demand_functions:
         try:
-            assert issubclass(demand_function, Demand)
+            assert is subclass(demand_function, Demand)
         except AssertionError:
             raise ValueError(f"Custom demand function {demand_function.label} must be a subclass of Demand")
         DEMAND_REGISTRY[len(DEMAND_REGISTRY)] = demand_function

@@ -6,6 +6,7 @@
 - [x] Refactor
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by regerence isn't allowing for the changes to agents by the controller to be reflected in the experiment.
+- [ ] Rewrite agent_constructor.py 
 ## High Level
 - [x] Move away from Routledge assumptions, since they are too restrictive.
     - [x] Add new learning algorithm's and agent functions
