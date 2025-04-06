@@ -1,4 +1,7 @@
-Memory vs performance. flag?
+How should I handle simulations where agents can be informed vs cannot?
+
+Downsides to cycling agents through market twice?
+- Kind of pointless, since if an agents demand at a price as been met then they wouldn't want to resubmit their orders an purchase more than their demand. Additionally there shouldn't be any offers left that the earlier agents would've taken since they would've been first in the priority queue the entire time. 
 
 Should Bayesian agents use the p-value of a given price as the probability of success in their geometric call? 
 - Alternatively they could have a function that allows them to convert price to probability, and perhaps a Thompson sampler could explore different functions.
