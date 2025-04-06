@@ -1,15 +1,15 @@
-from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from systems.trade import OrderBook
-from ACE_Experiment.globals import config, globals
+from dataclasses import dataclass
 
-import numpy as np
 import jax.numpy as jnp
+import numpy as np
 
+from ACE_Experiment.globals import config, globals
+from systems.trade import OrderBook
 
 
 class Market(ABC):
-    dividends: np.ndarray 
+    dividends: np.ndarray
     price: float = 0.0
     last_period_price: float = 0.0
     repetitions: int = config.repetitions
@@ -67,6 +67,3 @@ class RoutledgeMarket(Market):
         self.noise = np.random.normal(0, 1, self.repetitions)
         self.dividends = self.beta0 + self.beta1 * self.signal + self.noise
         self.supply = np.abs(np.random.normal(1000, 10, self.repetitions))
-
-
-    
