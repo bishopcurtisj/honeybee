@@ -1,7 +1,8 @@
-
 from collections import deque
-from sortedcontainers import SortedDict
+from itertools import chain
+
 import numpy as jnp
+from sortedcontainers import SortedDict
 
 from entities.agent import *
 
@@ -22,10 +23,11 @@ class Order:
             f"price={self.price}, qty={self.quantity})"
         )
 
+
 class OrderBook:
     """Order book for a single asset.
     Orders are stored in two dictionaries, one for buy orders and one for sell orders where prices are the keys and the valuers are deques.
-    
+
     """
 
     def __init__(self):
@@ -57,9 +59,7 @@ class OrderBook:
                 self.buy_orders[order.price] = deque([order])
             else:
                 self.buy_orders[order.price].append(order)
-    
 
-    
     def match_orders(self, order: Order) -> Order:
 
         best_bid = -next(iter(self.buy_orders))
@@ -70,50 +70,66 @@ class OrderBook:
             while order.quantity < 0 and order.price <= best_bid:
                 if order.quantity >= self.buy_orders[best_bid][0].quantity:
                     order.quantity += self.buy_orders[best_bid][0].quantity
-                    self.agent_trades[self.buy_orders[best_bid][0].trader_id].append((self.buy_orders[best_bid][0].quantity, best_bid))
-                    self.agent_trades[order.trader_id].append((-self.buy_orders[best_bid][0].quantity, best_bid))
+                    self.agent_trades[self.buy_orders[best_bid][0].trader_id].append(
+                        (self.buy_orders[best_bid][0].quantity, best_bid)
+                    )
+                    self.agent_trades[order.trader_id].append(
+                        (-self.buy_orders[best_bid][0].quantity, best_bid)
+                    )
                     self.buy_orders[best_bid].popleft()
                 else:
                     self.buy_orders[best_bid][0].quantity += order.quantity
-                    self.agent_trades[self.buy_orders[best_bid][0].trader_id].append((order.quantity, best_bid))
-                    self.agent_trades[order.trader_id].append((-order.quantity, best_bid))
+                    self.agent_trades[self.buy_orders[best_bid][0].trader_id].append(
+                        (order.quantity, best_bid)
+                    )
+                    self.agent_trades[order.trader_id].append(
+                        (-order.quantity, best_bid)
+                    )
                     order.quantity = 0
                 self.last_price = best_bid
-                
+
         else:
             # buy order
             while order.quantity > 0 and order.price >= best_ask:
                 if order.quantity >= self.sell_orders[best_ask][0].quantity:
                     order.quantity -= self.sell_orders[best_ask][0].quantity
-                    self.agent_trades[self.sell_orders[best_ask][0].trader_id].append((-self.sell_orders[best_ask][0].quantity, best_ask))
-                    self.agent_trades[order.trader_id].append((self.sell_orders[best_ask][0].quantity, best_ask))
+                    self.agent_trades[self.sell_orders[best_ask][0].trader_id].append(
+                        (-self.sell_orders[best_ask][0].quantity, best_ask)
+                    )
+                    self.agent_trades[order.trader_id].append(
+                        (self.sell_orders[best_ask][0].quantity, best_ask)
+                    )
                     self.sell_orders[best_ask].popleft()
                 else:
                     self.sell_orders[best_ask][0].quantity -= order.quantity
-                    self.agent_trades[self.sell_orders[best_ask][0].trader_id].append((-order.quantity, best_ask))
-                    self.agent_trades[order.trader_id].append((order.quantity, best_ask))
+                    self.agent_trades[self.sell_orders[best_ask][0].trader_id].append(
+                        (-order.quantity, best_ask)
+                    )
+                    self.agent_trades[order.trader_id].append(
+                        (order.quantity, best_ask)
+                    )
                     order.quantity = 0
                 self.last_price = best_ask
 
         return order
-    
+
     def get_agent_trades(self):
 
         for key in self.agent_trades.keys():
             self.agent_trades[key] = jnp.array(self.agent_trades[key])
 
         return self.agent_trades
-    
-    ## Vectorize this later
+
     def get_trades(self):
         """
-        Get all trades in the order book 
+        Get all trades in the order book
         Trades has the form:
-        [[quantity, price], [quantity, price], ...]  
+        [[quantity, price], [quantity, price], ...]
         """
-        trades = []
-        for agent_trades in self.agent_trades.values():
-            for trade in agent_trades:
-                trades.append(jnp.array(trade))
+        trades = list(chain.from_iterable(self.agent_trades.values()))
+        trades = jnp.array(trades)
+        mean_price = jnp.mean(trades[:, 1])
+        returns = trades[:, 1] - mean_price
+        trades = jnp.hstack((trades, returns))
 
         return trades
