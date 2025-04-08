@@ -12,13 +12,15 @@
 - [ ] Update the functions that call systems so that they can store and include extra params.
 - [ ] Update learning.py to better match other systems
 - [ ] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
-- [ ] Replace components.id with components.agent_id and components.confidence with componenets.risk_aversion
+- [x] Replace components.id with components.agent_id and components.confidence with componenets.risk_aversion
 - [ ] Fix genetic algorithm so that it uses the correct indices rather than hard coded ones that may or may not be wrong.
+
 ## Requirements for alpha
 
 - [x] Work on documentation, start making not of what fields each module requires agents to have.
 - [ ] Rewrite agent_constructor.py using new fields
-- [ ] Rewrite test suit and begin debugging 
+	- [ ] Update documentation to add usage of experiment.py and agent_constructor.py
+- [ ] Rewrite test suite and begin debugging 
 
 ## High Level
 - [ ] Vectorize as many loops as possible
