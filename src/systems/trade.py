@@ -11,11 +11,9 @@ class Order:
     __slots__ = ("trader_id", "price", "quantity")
 
     def __init__(self, trader_id: str, price: float, quantity: float):
-        # self.order_id = uuid.uuid4()  # Unique order ID
         self.trader_id = trader_id
         self.price = price
         self.quantity = quantity
-        # self.timestamp = timestamp  # Order arrival time
 
     def __repr__(self):
         return (
@@ -129,7 +127,9 @@ class OrderBook:
         trades = list(chain.from_iterable(self.agent_trades.values()))
         trades = jnp.array(trades)
         mean_price = jnp.mean(trades[:, 1])
-        returns = trades[:, 1] - mean_price
+        returns = (trades[:, 1] - mean_price) * (
+            -1 * trades[:, 0] / jnp.abs(trades[:, 0])
+        )
         trades = jnp.hstack((trades, returns))
 
         return trades
