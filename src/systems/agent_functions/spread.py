@@ -4,7 +4,7 @@ from typing import List, Union
 import numpy as jnp
 from jax.scipy.stats import norm
 
-from ACE_Experiment.globals import config, globals
+from src.globals import config, globals
 from systems.agent_functions.demand import DEMAND_REGISTRY
 
 

@@ -4,9 +4,9 @@ from typing import List, Union
 import numpy as jnp
 import numpy as np
 
-from ACE_Experiment.globals import config, globals
 from entities.agent import AgentInfo
 from entities.market import Market
+from src.globals import config, globals
 from systems.agent_functions.demand import Demand
 from systems.agent_functions.demand import register_demand_function as register_demand
 from systems.agent_functions.objective import Objective, calculate_fitness
@@ -25,6 +25,7 @@ from systems.models.information_policy import (
     register_info_policy,
 )
 from systems.models.loss import AgentLoss, register_loss
+from systems.models.model import Model
 
 
 class Experiment:
@@ -235,26 +236,33 @@ class Experiment:
         # Store updated values back in agents array
         globals.agents[traders[:, None], columns] = subset
 
-    def register_demand_function(demand_functions: Union[List[Demand], Demand]):
+    def register_demand_function(self, demand_functions: Union[List[Demand], Demand]):
         register_demand(demand_functions)
 
     def register_objective_function(
+        self,
         objective_functions: Union[List[Objective], Objective],
     ):
         register_objective(objective_functions)
 
-    def register_spread_function(spread_functions: Union[List[Spread], Spread]):
+    def register_spread_function(self, spread_functions: Union[List[Spread], Spread]):
         register_spread(spread_functions)
 
-    def register_utility_function(utility_functions: Union[List[Utility], Utility]):
+    def register_utility_function(
+        self, utility_functions: Union[List[Utility], Utility]
+    ):
         register_utility(utility_functions)
 
-    def register_loss_function(losses: Union[List[AgentLoss], AgentLoss]):
+    def register_loss_function(self, losses: Union[List[AgentLoss], AgentLoss]):
         register_loss(losses)
 
     def register_information_policy(
+        self,
         info_policies: Union[
             List[InformationDecisionPolicy], InformationDecisionPolicy
         ],
     ):
         register_info_policy(info_policies)
+
+    def register_learning_algorithms(self, models: Union[List[Model], Model]):
+        model_controller.register_models(models)

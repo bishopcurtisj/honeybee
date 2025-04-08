@@ -2,7 +2,7 @@ from typing import List, Union
 
 import numpy as jnp
 
-from ACE_Experiment.globals import globals
+from src.globals import globals
 from systems.models.bayesian import Bayesian
 from systems.models.genetic_algorithm import GeneticAlgorithm
 from systems.models.model import Model
@@ -27,7 +27,7 @@ class ModelController:
         )
         self.model_registry = {
             "genetic_algorithm": {"func": genetic_algorithm, "id": 1},
-            "thompson_sampler": {"func": Bayesian, "id": 2},
+            "Bayesian": {"func": Bayesian, "id": 2},
             "neural_network": {"func": neural_network, "id": 3},
         }
 
@@ -50,7 +50,6 @@ class ModelController:
                             == model["id"]
                         )[0]
                     ],
-                    globals.components,
                 ),
                 "id": len(self.model_registry),
                 "args": model.args,
@@ -63,7 +62,7 @@ class ModelController:
                 globals.agents[:, globals.components.learning_algorithm] == model["id"]
             )[0]
             globals.agents[model_agents[:, None]] = model["func"](
-                globals.agents[model_agents]
+                globals.agents[model_agents], model["args"]
             )
 
 

@@ -17,6 +17,7 @@ class AgentInfo:
                 setattr(self, name, index)
         self.demand_fx_params = demand_params
         self.learning_params = learning_params
+        self.info_params = info_params
 
     def __getitem__(self, key):
         """Allow dict-like access."""
