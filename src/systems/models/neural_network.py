@@ -4,7 +4,7 @@ from functools import singledispatch
 import numpy as jnp
 import tensorflow as tf
 
-from ACE_Experiment.globals import config, globals
+from src.globals import config, globals
 from systems.models.information_policy import INFORMATION_POLICY_REGISTRY
 from systems.models.loss import LOSS_REGISTRY
 from systems.models.model import Model
@@ -138,10 +138,8 @@ class NeuralNetwork(Model):
 
     def _informed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
         for agent in nn_learners:
-            X_train, y_train = self._prepare_training_data(
-                agent[globals.components.demand_fx_params[0]]
-            )
-            model_info = self.models[agent[globals.components.id]]
+            X_train, y_train = self._prepare_training_data()
+            model_info = self.models[agent[globals.components.agent_id]]
             model: tf.keras.Model = self._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
@@ -150,10 +148,8 @@ class NeuralNetwork(Model):
 
     def _uninformed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
         for agent in nn_learners:
-            X_train, y_train = self._prepare_uninformed_training_data(
-                agent[globals.components.demand_fx_params[0]]
-            )
-            model_info = self.models[agent[globals.components.id]]
+            X_train, y_train = self._prepare_uninformed_training_data()
+            model_info = self.models[agent[globals.components.agent_id]]
             model: tf.keras.Model = self._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])

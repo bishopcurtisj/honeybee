@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 import jax.numpy as jnp
 import numpy as np
 
-from ACE_Experiment.globals import config
+from src.globals import config
 from systems.trade import OrderBook
 
 

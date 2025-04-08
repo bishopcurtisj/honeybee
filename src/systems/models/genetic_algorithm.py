@@ -1,11 +1,13 @@
 import numpy as jnp
 import numpy.random as random
 
-from ACE_Experiment.globals import config, globals
+from globals import config, globals
 from systems.models.model import Model
 
 
 class GeneticAlgorithm(Model):
+
+    label: str = "Genetic Algorithm"
 
     def __init__(self, agents: jnp.ndarray):
         self.pop_size = len(agents)

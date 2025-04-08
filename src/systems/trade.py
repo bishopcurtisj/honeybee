@@ -4,8 +4,6 @@ from itertools import chain
 import numpy as jnp
 from sortedcontainers import SortedDict
 
-from entities.agent import *
-
 
 class Order:
     __slots__ = ("trader_id", "price", "quantity")

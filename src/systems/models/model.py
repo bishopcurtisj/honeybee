@@ -9,11 +9,6 @@ class Model(ABC):
     """
 
     label: str
-    args: dict
-
-    @abstractmethod
-    def __init__(self, agents: jnp.ndarray, *args, **kwargs):
-        pass
 
     @abstractmethod
     def __call__(self, agents: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:

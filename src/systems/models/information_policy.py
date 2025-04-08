@@ -6,7 +6,7 @@ import numpy as jnp
 import numpy as np
 import tensorflow as tf
 
-from ACE_Experiment.globals import config, globals
+from src.globals import config, globals
 
 
 class InformationDecisionPolicy(ABC):
@@ -136,7 +136,7 @@ class ThompsonSampling(InformationDecisionPolicy):
         Draws from a binomial where p = E(Informed)/(E(Informed) + E(Uninformed))
         """
         expected_info_return, expected_uninf_return = agents[
-            :, globals.components.demand_fx_params[3:5]
+            :, globals.components.info_params
         ]
 
         expected_info_return[
@@ -162,8 +162,8 @@ class ThompsonSampling(InformationDecisionPolicy):
             ]
         ) / globals.generation
 
-        agents[:, globals.components.demand_fx_params[3]] = expected_info_return
-        agents[:, globals.components.demand_fx_params[4]] = expected_uninf_return
+        agents[:, globals.components.info_params[0]] = expected_info_return
+        agents[:, globals.components.info_params[1]] = expected_uninf_return
         p = expected_info_return / (expected_info_return + expected_uninf_return)
         agents[:, globals.components.informed] = jnp.random.binomial(1, p, len(agents))
         return agents
@@ -207,6 +207,7 @@ def register_info_policy(
 
 INFORMATION_POLICY_REGISTRY = {
     0: FixedInformation,
-    1: ThompsonSampling,
+    1: BayesianInfo,
     2: ReinforcementLearning,
+    3: ThompsonSampling,
 }

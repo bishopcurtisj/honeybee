@@ -1,7 +1,7 @@
 import numpy as jnp
 from jax import vmap
 
-from ACE_Experiment.globals import config, globals
+from src.globals import config, globals
 from systems.models.information_policy import INFORMATION_POLICY_REGISTRY
 from systems.models.model import Model
 
