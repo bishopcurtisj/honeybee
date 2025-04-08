@@ -6,11 +6,17 @@
 - [x] Refactor
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by reference isn't allowing for the changes to agents by the controller to be reflected in the experiment.
-- [ ] Rewrite agent_constructor.py 
+
 - [x] Set up the ability for agents to purchase information, for now it will be all or nothing.
 - [x] Add registration function wrappers to experiment.py
-- [ ] Work on documentation, start making not of what fields each module requires agents to have.
 - [ ] Update the functions that call systems so that they can store and include extra params.
+
+## Requirements for alpha
+
+- [ ] Work on documentation, start making not of what fields each module requires agents to have.
+- [ ] Rewrite agent_constructor.py using new fields
+- [ ] Rewrite test suit and begin debugging 
+
 ## High Level
 - [ ] Vectorize as many loops as possible
 	- [ ] vmap: need to learn more
