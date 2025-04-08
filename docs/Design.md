@@ -1,27 +1,27 @@
 # Structure
 `src/`
+├── `experiment.py`
+├── `globals.py`
 ├── `entities`
 │   ├── `agent.py`
 │   ├──`market.py`
 │   └── `trades.py`
-├── `experiment.py`
-├── `globals.py`
-├── `setup.py`
 └── `systems`
+    ├── `learning.py`
+    ├── `trade.py`
     ├── `agent_functions`
     │   ├── `demand.py`
     │   ├── `objective.py`
     │   ├── `spread.py`
     │   └── `utility.py`
-    ├── `learning.py`
-    ├── `models`
-    │   ├── `bayesian.py`
-    │   ├── `genetic_algorithm.py`
-    │   ├── `information_policy.py`
-    │   ├── `loss.py`
-    │   ├── `model.py`
-    │   └── `neural_network.py`
-    └── `trade.py`
+    └── `models`
+        ├── `bayesian.py`
+        ├── `genetic_algorithm.py`
+        ├── `information_policy.py`
+        ├── `loss.py`
+        ├── `model.py`
+        └── `neural_network.py`
+    
 # Experiment
 
 ## Purpose
