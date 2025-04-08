@@ -17,7 +17,7 @@ This package is designed to provide a modular and extensible framework for Agent
     │   ├── [`spread.py`](#spread)  
     │   └── [`utility.py`](#utility)  
     └── [`models`](#models)  
-        ├── [`model.py`](#model)  	
+        ├── [`model.py`](#model)  
         ├── [`bayesian.py`](#bayesian)  
         ├── [`genetic_algorithm.py`](#genetic_algorithm)  
         ├── [`neural_network.py`](#neural_network)  
