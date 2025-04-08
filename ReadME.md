@@ -196,31 +196,31 @@ class AgentInfo:
 ---
 ### Components
 
-| Field                | Description                                                               |
-| -------------------- | ------------------------------------------------------------------------- |
-| `fitness`            | Agent fitness score, updated by learning algorithms                       |
-| `informed`           | Binary flag (0 or 1) indicating whether an agent receives a signal        |
-| `signal`             | The noisy valuation signal observed by informed agents                    |
-| `bid`                | Price at which the agent is willing to buy                                |
-| `ask`                | Price at which the agent is willing to sell                               |
-| `bid_quantity`       | Quantity offered at the bid price                                         |
-| `ask_quantity`       | Quantity offered at the ask price                                         |
-| `demand`             | Raw demand value computed from the agent’s demand function                |
-| `demand_function`    | Index into the `DEMAND_REGISTRY` used by this agent                       |
-| `demand_fx_params`   | Auto-extracted list of parameters used in demand estimation               |
-| `objective_function` | Index into `OBJECTIVE_REGISTRY` to determine fitness calculation strategy |
-| `utility_function`   | Index into `UTILITY_REGISTRY` used to evaluate expected utility           |
-| `risk_aversion`      | Used in utility and fitness functions, esp. CARA models                   |
-| `learning_algorithm` | Index into model registry, determines agent’s learning strategy           |
-| `learning_params`    | Auto-extracted list of neural net hyperparameters for NN learners         |
-| `spread_function`    | Index into `SPREAD_REGISTRY`, used to determine bid-ask spread logic      |
-| `confidence`         | Determines spread width for Bayesian agents                               |
-| `loss`               | Index into `LOSS_REGISTRY`, used in neural net agents                     |
-| `loss_params`        | Hyperparameters passed to the loss function constructor                   |
-| `information_policy` | Index into `INFORMATION_POLICY_REGISTRY` for info acquisition logic       |
-| `info_params`        | (Optional) Vector of expected values for informed/uninformed outcomes     |
-| `agent_type`         | Used to filter agents (e.g., only active traders) during trading routines |
-| `agent_id`           | Unique identifier for each agent, often used as a key in dictionaries     |
+| Field                | Description                                                                                                                   |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `fitness`            | Agent fitness score, updated by learning algorithms                                                                           |
+| `informed`           | Binary flag (0 or 1) indicating whether an agent receives a signal                                                            |
+| `signal`             | The noisy valuation signal observed by informed agents                                                                        |
+| `bid`                | Price at which the agent is willing to buy                                                                                    |
+| `ask`                | Price at which the agent is willing to sell                                                                                   |
+| `bid_quantity`       | Quantity offered at the bid price                                                                                             |
+| `ask_quantity`       | Quantity offered at the ask price                                                                                             |
+| `demand`             | Raw demand value computed from the agent’s demand function                                                                    |
+| `demand_function`    | Index into the `DEMAND_REGISTRY` used by this agent                                                                           |
+| `demand_fx_params`   | Auto-extracted list of parameters used in demand estimation                                                                   |
+| `objective_function` | Index into `OBJECTIVE_REGISTRY` to determine fitness calculation strategy                                                     |
+| `utility_function`   | Index into `UTILITY_REGISTRY` used to evaluate expected utility                                                               |
+| `risk_aversion`      | Used in utility and fitness functions, esp. CARA models                                                                       |
+| `learning_algorithm` | Index into model registry, determines agent’s learning strategy                                                               |
+| `learning_params`    | Hyperparameters used by learning algorithms                                                                                   |
+| `spread_function`    | Index into `SPREAD_REGISTRY`, used to determine bid-ask spread logic                                                          |
+| `confidence`         | Determines spread width for Agents, this should be a dollar amount for non-Bayesian agents, and an alpha level for Bayesians. |
+| `loss`               | Index into `LOSS_REGISTRY`, used in neural net agents                                                                         |
+| `loss_params`        | Hyperparameters passed to the loss function constructor                                                                       |
+| `information_policy` | Index into `INFORMATION_POLICY_REGISTRY` for info acquisition logic                                                           |
+| `info_params`        | Hyperparameters passed to InformationDecisionPolicy constructors                                                              |
+| `agent_type`         | Used to filter agents (e.g., only active traders) during trading routines                                                     |
+| `agent_id`           | Unique identifier for each agent, often used as a key in dictionaries                                                         |
 **Note:** These components are used in at least one of the implemented functions, not all will be necessary depending on the type of simulation you are running.
 ## `Market`
 
@@ -305,6 +305,7 @@ To add a custom learning algorithm, subclass `Model` and register it using `Mode
 - A `label` (string) used to identify it in the registry.
 - A callable `__call__` method that takes a subset of agents and returns updated agent states.
 - Optional `args` if the model needs runtime arguments.
+- If your learning algorithm is unable to use a `@staticmethod __call__()`, you must instantiate it and then register the instantiated object. If each agent needs it's own instance, utilize the neural network approach as a guide to do so.
 
 ```python
 # Example custom model registration
@@ -539,7 +540,7 @@ class Mean_variance(Objective):
     def __call__(utilities: jnp.ndarray, risk_aversion: float) -> float
 ```
 - Computes a mean-variance utility tradeoff:  
-    `mean(utilities) - 0.5 * risk_aversion * var(utilities)`
+	`mean(utilities) - 0.5 * risk_aversion * var(utilities)`
 ---
 ```python
 def calculate_fitness(
@@ -693,7 +694,7 @@ class Const_abs_risk_aversion(Utility):
     def __call__(returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray
 ```
 - Implements the CARA utility function:  
-    `U(x) = -exp(-risk_aversion * x)`
+	`U(x) = -exp(-risk_aversion * x)`
 ---
 ```python
 def calculate_utility(
@@ -780,7 +781,16 @@ $$\mu_n = \frac{\mu/\sigma^2 + \sum q_i p_i / \tau^2}{1/\sigma^2 + \sum q_i / \t
 - `information_policy`: Optional; references a function in `INFORMATION_POLICY_REGISTRY` to further alter post-update beliefs.
 - `globals.trades`: Trade history used for inference, injected from the global simulation context.
 
+### Allowed Function Pairings
 
+| Function type      | Allowed versions                   |
+| ------------------ | ---------------------------------- |
+| Demand             | `BayesianDemand`                   |
+| Spread             | `BayesianSpread`                   |
+| Objective          | All                                |
+| Utility            | All                                |
+| Loss               | N/A                                |
+| Information Policy | `BayesianInfo`, `ThompsonSampling` |
 ## `Genetic_Algorithm`
 
 ### Purpose
@@ -820,6 +830,18 @@ class GeneticAlgorithm(Model):
 - `demand_fx_params`: Modified during crossover/mutation.
 - `informed`: Directs the model to use appropriate evolution logic.
 - `config.mutation_rate`, `config.crossover_rate`: Must be set for GA to function.
+### Allowed Function Pairings
+
+
+| Function type      | Allowed versions     |
+| ------------------ | -------------------- |
+| Demand             | `GS_linear`          |
+| Spread             | `LinearDemandSpread` |
+| Objective          | All                  |
+| Utility            | All                  |
+| Loss               | N/A                  |
+| Information Policy | N/A                  |
+
 ## `Neural_Network`
 ### Purpose
 
@@ -869,6 +891,14 @@ If `config.memory_optimization` is enabled:
 - Models are saved to `.keras` files per agent.
 - Keras sessions and Python references are cleared using `gc.collect()` after saving.
 
+| Function type      | Allowed versions                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| Demand             | N/A                                                                                                                 |
+| Spread             | `LinearDemandSpread`, N/A                                                                                           |
+| Objective          | All, Requires a loss function that calculates the negative fitness                                                  |
+| Utility            | All                                                                                                                 |
+| Loss               | All, must calculate the negative fitness using the quantity as predictions and return to that trade as true values. |
+| Information Policy | `ReinforcementLearning`, `BayesianInfo`, `ThompsonSampling`                                                         |
 ## `Loss_Functions`
 
 ### Purpose
