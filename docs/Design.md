@@ -733,7 +733,7 @@ To create a custom learning algorithm, users must subclass `Model` and implement
 ```python
 def __call__(self, agents: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
     ...
-    ```
+```
 
 ## `Bayesian`
 
