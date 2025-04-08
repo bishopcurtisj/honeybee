@@ -1,3 +1,9 @@
+
+If agents are allowed to be informed, but cannot change status then the update informed function will just be blank. 
+
+Every agent is thompson with information? Explore exploit trade off? 
+How should the agents learn the expected value of being informed?
+
 Thompson:
 	The agent should use a binomial distribution to determine if they will be informed. This agents demand is calculated using draws from multiple distributions. Their bid-ask prices is a confidence interval on their prior distribution over the value of the asset, where $alpha$ is their risk-aversion.
 	 The bid-ask quantities are the results of a draw from negative-binomial distributions, where $r=1$ and it is interpreted as how many shares should I buy before there is one that I shouldn't buy. The probability parameter should be tied to price in some way. Perhaps $X*price$ for ask-quantity and $1-X*price$ for bid-quantity where $X$ is the value being tweaked by the learning algorithm.
