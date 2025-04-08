@@ -891,6 +891,8 @@ If `config.memory_optimization` is enabled:
 - Models are saved to `.keras` files per agent.
 - Keras sessions and Python references are cleared using `gc.collect()` after saving.
 
+### Allowed Function Pairings
+
 | Function type      | Allowed versions                                                                                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------- |
 | Demand             | N/A                                                                                                                 |
