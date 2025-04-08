@@ -10,14 +10,16 @@
 - [x] Set up the ability for agents to purchase information, for now it will be all or nothing.
 - [x] Add registration function wrappers to experiment.py
 - [ ] Update the functions that call systems so that they can store and include extra params.
-- [ ] Update learning.py to better match other systems
+	- [ ] Update learning.py to better match other systems 
 - [ ] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
-- [x] Replace components.id with components.agent_id and components.confidence with componenets.risk_aversion
+- [x] Replace components.id with components.agent_id
 - [ ] Fix genetic algorithm so that it uses the correct indices rather than hard coded ones that may or may not be wrong.
 
 ## Requirements for alpha
 
 - [x] Work on documentation, start making not of what fields each module requires agents to have.
+	- [x] Add acceptable values to components
+	- [ ] Add acceptable pairings of functions to models
 - [ ] Rewrite agent_constructor.py using new fields
 	- [ ] Update documentation to add usage of experiment.py and agent_constructor.py
 - [ ] Rewrite test suite and begin debugging 
@@ -56,7 +58,8 @@
 	- [x] Track and append trades from each repetition
 - [x] Calculate utility for each trade.
 	- [x] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?
-- [x] Revisit RL information policy.
+- [x] Revisit RL information policy
+- [ ] Add ability for Neural Network to set spread
 
 ### Bayesians
 

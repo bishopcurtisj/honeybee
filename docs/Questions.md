@@ -1,4 +1,6 @@
-How should I handle simulations where agents can be informed vs cannot?
+
+Should informed agents instead be able to adjust their behavior for the current period after seeing results of some of the paths.
+
 
 Downsides to cycling agents through market twice?
 - Kind of pointless, since if an agents demand at a price as been met then they wouldn't want to resubmit their orders an purchase more than their demand. Additionally there shouldn't be any offers left that the earlier agents would've taken since they would've been first in the priority queue the entire time. 
