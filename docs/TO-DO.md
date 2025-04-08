@@ -10,10 +10,13 @@
 - [x] Set up the ability for agents to purchase information, for now it will be all or nothing.
 - [x] Add registration function wrappers to experiment.py
 - [ ] Update the functions that call systems so that they can store and include extra params.
-
+- [ ] Update learning.py to better match other systems
+- [ ] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
+- [ ] Replace components.id with components.agent_id and components.confidence with componenets.risk_aversion
+- [ ] Fix genetic algorithm so that it uses the correct indices rather than hard coded ones that may or may not be wrong.
 ## Requirements for alpha
 
-- [ ] Work on documentation, start making not of what fields each module requires agents to have.
+- [x] Work on documentation, start making not of what fields each module requires agents to have.
 - [ ] Rewrite agent_constructor.py using new fields
 - [ ] Rewrite test suit and begin debugging 
 
@@ -22,7 +25,7 @@
 	- [ ] vmap: need to learn more
 - [x] Refactor to split functions into their own modules, i.e. demand.py, objective.py, spread.py for now it's fine, but as more options are added it'll get messy. It'll also be easier for other people to navigate.
 - [ ] Update Jax implementation
-- [ ] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
+- [x] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
 	-  Have the Bayesians make a draw for their spread/risk aversion
 	-  Neural network should have some variance until it learns enough.
 - [x] Move away from Routledge assumptions, since they are too restrictive.
