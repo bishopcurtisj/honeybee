@@ -3,14 +3,17 @@ from typing import List
 
 import numpy as jnp
 
+from entities.agent import AgentInfo
+
 
 class Globals:
 
     agents: jnp.ndarray
-    components: object
+    components: AgentInfo
     market: object
     trades: jnp.ndarray  # [quantity, price, difference from benchmark (mean/last)]
     informed: bool
+    generation: int
 
 
 class Config:

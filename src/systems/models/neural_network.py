@@ -2,12 +2,12 @@ import gc
 from functools import singledispatch
 
 import numpy as jnp
-import numpy as np
-import scipy.optimize as opt
 import tensorflow as tf
 
 from ACE_Experiment.globals import config, globals
-from systems.models.model import INFORMATION_POLICY_REGISTRY, LOSS_REGISTRY, Model
+from systems.models.information_policy import INFORMATION_POLICY_REGISTRY
+from systems.models.loss import LOSS_REGISTRY
+from systems.models.model import Model
 
 
 class NeuralNetwork(Model):
@@ -24,19 +24,30 @@ class NeuralNetwork(Model):
                 "input_shape",
                 "hidden_layers",
                 "hidden_nodes",
-                "demand_fx_params",
                 "optimizer",
                 "epochs",
                 "loss",
                 "optimization_steps",
-                "learning_rate",
             ] = agent[globals.components.learning_params]
+            learning_rate, entropy_coeff, update_frequency = agent[
+                globals.components.info_params
+            ]  ## Update this for new InformationDecisionPolicies
+            self.models[agent[globals.components.agent_id]][
+                "info_policy"
+            ] = INFORMATION_POLICY_REGISTRY[
+                agent[globals.components.information_policy]
+            ](
+                agent=agent,
+                learning_rate=learning_rate,
+                entropy_coeff=entropy_coeff,
+                update_frequency=update_frequency,
+            )
             self.models[agent[globals.components.agent_id]]["loss"] = LOSS_REGISTRY[
                 self.models[agent[globals.components.agent_id]]["loss"]
             ](agent[globals.components.loss_params])
             model = self._build_model(
                 self.models[agent[globals.components.agent_id]][
-                    "input_shape", "hidden_layers", "hidden_nodes", "demand_fx_params"
+                    "input_shape", "hidden_layers", "hidden_nodes"
                 ].values()
             )
             if config.memory_optimization:
@@ -91,7 +102,6 @@ class NeuralNetwork(Model):
 
     def _prepare_training_data(
         self,
-        util_func: int,
     ) -> jnp.ndarray:
         inputs, outputs = globals.trades[:, 1], globals.trades[:, 2]
         return inputs, outputs
@@ -103,7 +113,6 @@ class NeuralNetwork(Model):
         inputs, outputs = sample[:, 1], sample[:, 2]
         return inputs, outputs
 
-    ## refactor to add informed agents
     def __call__(self, nn_learners: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
 
         if globals.informed:
@@ -123,13 +132,12 @@ class NeuralNetwork(Model):
             )
 
         else:
-            nn_learners = self.informed_agents(nn_learners)
+            nn_learners = self._informed(nn_learners)
 
         return nn_learners
 
-    def informed_agents(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
-        for i in range(len(nn_learners)):
-            agent = nn_learners[i]
+    def _informed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
+        for agent in nn_learners:
             X_train, y_train = self._prepare_training_data(
                 agent[globals.components.demand_fx_params[0]]
             )
@@ -138,11 +146,10 @@ class NeuralNetwork(Model):
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
 
-        return nn_learners
+            agent = model_info["info_policy"](agent)
 
-    def uninformed_agents(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
-        for i in range(len(nn_learners)):
-            agent = nn_learners[i]
+    def _uninformed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
+        for agent in nn_learners:
             X_train, y_train = self._prepare_uninformed_training_data(
                 agent[globals.components.demand_fx_params[0]]
             )

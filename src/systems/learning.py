@@ -3,7 +3,7 @@ from typing import List, Union
 import numpy as jnp
 
 from ACE_Experiment.globals import globals
-from systems.models.bayesian import thompson_sampler
+from systems.models.bayesian import Bayesian
 from systems.models.genetic_algorithm import GeneticAlgorithm
 from systems.models.model import Model
 from systems.models.neural_network import NeuralNetwork
@@ -27,7 +27,7 @@ class ModelController:
         )
         self.model_registry = {
             "genetic_algorithm": {"func": genetic_algorithm, "id": 1},
-            "thompson_sampler": {"func": thompson_sampler, "id": 2},
+            "thompson_sampler": {"func": Bayesian, "id": 2},
             "neural_network": {"func": neural_network, "id": 3},
         }
 

@@ -1,12 +1,30 @@
 import json
+from typing import List, Union
 
 import numpy as jnp
 import numpy as np
 
 from ACE_Experiment.globals import config, globals
-from entities.agent import SPREAD_REGISTRY, AgentInfo, calculate_fitness
+from entities.agent import AgentInfo
 from entities.market import Market
+from systems.agent_functions.demand import Demand
+from systems.agent_functions.demand import register_demand_function as register_demand
+from systems.agent_functions.objective import Objective, calculate_fitness
+from systems.agent_functions.objective import (
+    register_objective_function as register_objective,
+)
+from systems.agent_functions.spread import SPREAD_REGISTRY, Spread
+from systems.agent_functions.spread import register_spread_function as register_spread
+from systems.agent_functions.utility import Utility
+from systems.agent_functions.utility import (
+    register_utility_function as register_utility,
+)
 from systems.learning import model_controller
+from systems.models.information_policy import (
+    InformationDecisionPolicy,
+    register_info_policy,
+)
+from systems.models.loss import AgentLoss, register_loss
 
 
 class Experiment:
@@ -46,11 +64,13 @@ class Experiment:
 
         config.generations = generations
         config.repetitions = repetitions
+        globals.generation = 1
 
         for _ in range(generations):
             trades = self.trade()
             self.calculate_agent_fitness(trades)
             self.learn()
+            globals.generation += 1
 
         self.save()
         return globals.agents
@@ -214,3 +234,27 @@ class Experiment:
 
         # Store updated values back in agents array
         globals.agents[traders[:, None], columns] = subset
+
+    def register_demand_function(demand_functions: Union[List[Demand], Demand]):
+        register_demand(demand_functions)
+
+    def register_objective_function(
+        objective_functions: Union[List[Objective], Objective],
+    ):
+        register_objective(objective_functions)
+
+    def register_spread_function(spread_functions: Union[List[Spread], Spread]):
+        register_spread(spread_functions)
+
+    def register_utility_function(utility_functions: Union[List[Utility], Utility]):
+        register_utility(utility_functions)
+
+    def register_loss_function(losses: Union[List[AgentLoss], AgentLoss]):
+        register_loss(losses)
+
+    def register_information_policy(
+        info_policies: Union[
+            List[InformationDecisionPolicy], InformationDecisionPolicy
+        ],
+    ):
+        register_info_policy(info_policies)

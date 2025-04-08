@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 
 import jax.numpy as jnp
 import numpy as np
 
-from ACE_Experiment.globals import config, globals
+from ACE_Experiment.globals import config
 from systems.trade import OrderBook
 
 
