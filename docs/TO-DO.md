@@ -19,7 +19,7 @@
 
 - [x] Work on documentation, start making not of what fields each module requires agents to have.
 	- [x] Add acceptable values to components
-	- [ ] Add acceptable pairings of functions to models
+	- [x] Add acceptable pairings of functions to models
 - [ ] Rewrite agent_constructor.py using new fields
 	- [ ] Update documentation to add usage of experiment.py and agent_constructor.py
 - [ ] Rewrite test suite and begin debugging 
