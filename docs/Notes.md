@@ -1,3 +1,16 @@
+cloc output:
+ 
+Language                     files          blank        comment           code
+
+Python                          12            262            122           1052
+JSON                             1              1              0             21
+Text                             3              1              0             19
+CSV                              1              0              0              1
+
+SUM:                            17            264            122           1093
+
+
+
 
 If agents are allowed to be informed, but cannot change status then the update informed function will just be blank. 
 

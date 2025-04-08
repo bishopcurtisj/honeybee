@@ -1,4 +1,9 @@
 
+$$\frac{p}{1-p} = \frac{E(Informed)}{E(Uninformed)}$$
+$$p*E(Uninformed) = (1-p)*E(Informed)$$
+$$p*E(Uninformed) = E(Informed)-p*E(Informed)$$
+$$E(Informed)=p*(E(Uninformed)+E(Informed)$$
+$$p=\frac{E(Informed)}{E(Uninformed)+E(Informed)}$$
 
 ### Limit order book vs Intersecting demand/supply
 

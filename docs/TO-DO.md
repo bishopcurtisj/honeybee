@@ -7,10 +7,14 @@
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by reference isn't allowing for the changes to agents by the controller to be reflected in the experiment.
 - [ ] Rewrite agent_constructor.py 
-- [ ] Set up the ability for agents to purchase information, for now it will be all or nothing.
+- [x] Set up the ability for agents to purchase information, for now it will be all or nothing.
+- [x] Add registration function wrappers to experiment.py
+- [ ] Work on documentation, start making not of what fields each module requires agents to have.
+- [ ] Update the functions that call systems so that they can store and include extra params.
 ## High Level
 - [ ] Vectorize as many loops as possible
-- [ ] Refactor to split functions into their own modules, i.e. demand.py, objective.py, spread.py for now it's fine, but as more options are added it'll get messy. It'll also be easier for other people to navigate.
+	- [ ] vmap: need to learn more
+- [x] Refactor to split functions into their own modules, i.e. demand.py, objective.py, spread.py for now it's fine, but as more options are added it'll get messy. It'll also be easier for other people to navigate.
 - [ ] Update Jax implementation
 - [ ] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
 	-  Have the Bayesians make a draw for their spread/risk aversion
@@ -41,15 +45,17 @@
 	- [x] Track and append trades from each repetition
 - [x] Calculate utility for each trade.
 	- [x] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?
+- [x] Revisit RL information policy.
 
 ### Bayesians
 
-- [ ] Implement ability for bayesians to be informed
+- [x] Implement ability for bayesians to be informed
 	-  This requires me to decide on whether information should be an incremental function or single purchase.
-- [ ] Need a function to determine behavior for current market (Where should this go?)
+- [x] Add updating to Bayesian/Thompson Sampling Info Policy
+- [x] Need a function to determine behavior for current market (Where should this go?)
 	- [x] New spread function
 	- [x] New Demand function
-- [ ] Fix update_priors() so that it allows for different trades for each agent.
+- [x] Fix update_priors() so that it allows for different trades for each agent.
 - [x] Before Thompson Sampler and BUCB need to implement a vanilla subjective Bayesian
 - [x] Need to refactor calculations to change from one-size fits all approach
 - [x] Need to implement updating function
