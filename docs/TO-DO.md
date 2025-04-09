@@ -21,12 +21,14 @@
 	- [x] Add acceptable values to components
 	- [x] Add acceptable pairings of functions to models
 - [ ] Rewrite agent_constructor.py using new fields
+	- [ ] Update Demand/Learning Algorithm and demand/info parameters
+	- [ ] Need to redo how `AgentInfo` handles function parameters.
 	- [ ] Update documentation to add usage of experiment.py and agent_constructor.py
 - [ ] Rewrite test suite and begin debugging 
 
 ## High Level
 - [ ] Vectorize as many loops as possible
-	- [ ] vmap: need to learn more
+	- [ ] `vmap`: need to learn more
 - [x] Refactor to split functions into their own modules, i.e. demand.py, objective.py, spread.py for now it's fine, but as more options are added it'll get messy. It'll also be easier for other people to navigate.
 - [ ] Update Jax implementation
 - [x] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
