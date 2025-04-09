@@ -125,6 +125,9 @@ class BayesianSpread(Spread):
         return agents
 
 
+class NNSpread(Spread): ...
+
+
 def register_spread_function(spread_functions: Union[List[Spread], Spread]):
     """
     Registers custom spread function's,
@@ -141,4 +144,4 @@ def register_spread_function(spread_functions: Union[List[Spread], Spread]):
         SPREAD_REGISTRY[len(SPREAD_REGISTRY)] = spread_function
 
 
-SPREAD_REGISTRY = {1: LinearDemandSpread, 2: BayesianSpread}
+SPREAD_REGISTRY = {1: LinearDemandSpread, 2: BayesianSpread, 3: NNSpread}
