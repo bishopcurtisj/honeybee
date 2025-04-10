@@ -5,6 +5,8 @@ import numpy as jnp
 import numpy as np
 import tensorflow as tf
 
+from globals import globals
+
 
 class AgentLoss(tf.keras.losses.Loss, metaclass=ABCMeta):
     """Abstract parent for all trade fitness losses in the framework.
@@ -38,7 +40,8 @@ class NegCARA(AgentLoss):
 
     def __init__(self, *args, **kwargs):
         super().__init__(reduction=self.reduction, name=self.name, **kwargs)
-        self.risk_aversion = float(args[0])
+        agent = args[0]
+        self.risk_aversion = agent[globals.components.risk_aversion]
 
     def call(self, y_true, y_pred):
         ## y_pred = quantity
