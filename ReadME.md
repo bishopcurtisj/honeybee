@@ -207,20 +207,31 @@ class AgentInfo:
 | `ask_quantity`       | Quantity offered at the ask price                                                                                             |
 | `demand`             | Raw demand value computed from the agent’s demand function                                                                    |
 | `demand_function`    | Index into the `DEMAND_REGISTRY` used by this agent                                                                           |
-| `demand_fx_params`   | Auto-extracted list of parameters used in demand estimation                                                                   |
 | `objective_function` | Index into `OBJECTIVE_REGISTRY` to determine fitness calculation strategy                                                     |
 | `utility_function`   | Index into `UTILITY_REGISTRY` used to evaluate expected utility                                                               |
 | `risk_aversion`      | Used in utility and fitness functions, esp. CARA models                                                                       |
 | `learning_algorithm` | Index into model registry, determines agent’s learning strategy                                                               |
-| `learning_params`    | Hyperparameters used by learning algorithms                                                                                   |
 | `spread_function`    | Index into `SPREAD_REGISTRY`, used to determine bid-ask spread logic                                                          |
 | `confidence`         | Determines spread width for Agents, this should be a dollar amount for non-Bayesian agents, and an alpha level for Bayesians. |
 | `loss`               | Index into `LOSS_REGISTRY`, used in neural net agents                                                                         |
-| `loss_params`        | Hyperparameters passed to the loss function constructor                                                                       |
 | `information_policy` | Index into `INFORMATION_POLICY_REGISTRY` for info acquisition logic                                                           |
-| `info_params`        | Hyperparameters passed to InformationDecisionPolicy constructors                                                              |
 | `agent_type`         | Used to filter agents (e.g., only active traders) during trading routines                                                     |
 | `agent_id`           | Unique identifier for each agent, often used as a key in dictionaries                                                         |
+| `mu_prior`           | Mean of Bayesian agents price distribution                                                                                    |
+| `sigma_prior`        | Std dev of Bayesian agents price distribution                                                                                 |
+| `tau`                | Bayesian agents update sensitivity                                                                                            |
+| `input_shape`        | Shape of inputs for Neural Network agents                                                                                     |
+| `hidden_layers`      | Number of hidden layers in Neural Network                                                                                     |
+| `hidden_nodes`       | Nodes per hidden layer in Neural Network                                                                                      |
+| `epochs`             | Training epochs performed by Neural Network                                                                                   |
+| `optimizer`          | Optimizer used by Neural Network, indexes into `OPTIMIZER_REGISTRY`                                                           |
+| `learning_rate`      | Learning rate for Neural Network / RL info policy                                                                             |
+| `entropy_coeff`      | Parameter for RL info policy                                                                                                  |
+| `update_frequency`   | How often the RL info policy updates                                                                                          |
+| `info_return`        | Expected return to being informed                                                                                             |
+| `uninf_return`       | Expected return to being uninformed                                                                                           |
+| `beta0`              | Linear demand function coefficient                                                                                            |
+| `beta1`              | Linear demand function coefficient                                                                                            |
 **Note:** These components are used in at least one of the implemented functions, not all will be necessary depending on the type of simulation you are running.
 ## `Market`
 
