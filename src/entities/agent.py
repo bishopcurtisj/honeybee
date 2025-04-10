@@ -3,21 +3,9 @@ class AgentInfo:
 
     def __init__(self, columns):
         self._columns = columns  # Store original column names
-        demand_params = []
-        learning_params = []
-        info_params = []
+
         for index, name in enumerate(columns):
-            if "dfx_" in name:
-                demand_params.append(index)
-            elif "la_" in name:
-                learning_params.append(index)
-            elif "info_" in name:
-                info_params.append(index)
-            else:
-                setattr(self, name, index)
-        self.demand_fx_params = demand_params
-        self.learning_params = learning_params
-        self.info_params = info_params
+            setattr(self, name, index)
 
     def __getitem__(self, key):
         """Allow dict-like access."""

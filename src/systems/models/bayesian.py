@@ -8,25 +8,27 @@ from systems.models.model import Model
 
 class Bayesian(Model):
 
-    @staticmethod
-    def __call__(agents: jnp.ndarray) -> jnp.ndarray:
+    def __init__(self):
+
+        self.informed = globals.components.informed
+        self.mu_prior = globals.components.mu_prior
+        self.sigma_prior = globals.components.sigma_prior
+        self.tau = globals.components.tau
+
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
 
         if globals.informed:
             return Bayesian._informed(agents)
         else:
             return Bayesian._uninformed(agents)
 
-    def _uninformed(agents: jnp.ndarray) -> jnp.ndarray:
+    def _uninformed(self, agents: jnp.ndarray) -> jnp.ndarray:
         return Bayesian.update_priors(agents, globals.trades)
 
-    def _informed(agents: jnp.ndarray) -> jnp.ndarray:
+    def _informed(self, agents: jnp.ndarray) -> jnp.ndarray:
 
-        informed_agents = jnp.where(
-            globals.agents[:, globals.components.informed] == 1
-        )[0]
-        uninformed_agents = jnp.where(
-            globals.agents[:, globals.components.informed] == 0
-        )[0]
+        informed_agents = jnp.where(globals.agents[:, self.informed] == 1)[0]
+        uninformed_agents = jnp.where(globals.agents[:, self.informed] == 0)[0]
 
         samples = jnp.array(
             [
@@ -38,11 +40,11 @@ class Bayesian(Model):
                 for _ in len(uninformed_agents)
             ]
         )
-        agents[informed_agents] = Bayesian.update_priors(
+        agents[informed_agents] = self.update_priors(
             agents[informed_agents],
             globals.trades,
         )
-        agents[uninformed_agents] = Bayesian.update_priors(
+        agents[uninformed_agents] = self.update_priors(
             agents[uninformed_agents],
             samples,
         )
@@ -62,19 +64,17 @@ class Bayesian(Model):
 
         return agents
 
-    def update_priors(agents: jnp.ndarray, trades: jnp.ndarray) -> jnp.ndarray:
+    def update_priors(self, agents: jnp.ndarray, trades: jnp.ndarray) -> jnp.ndarray:
         """
         Updates Bayesian agent priors using their personal trade histories.
 
         agents: array of shape (num_agents, ...)
         trades: array of shape (num_agents, num_trades, 2) where [:, :, 0] = quantity, [:, :, 1] = price
         """
-        params = agents[
-            :, globals.components.demand_fx_params
-        ]  # shape: (num_agents, 3)
-        mu_prior = params[:, 0]
-        sigma_prior = params[:, 1]
-        tau = params[:, 2]
+
+        mu_prior = agents[:, self.mu_prior]
+        sigma_prior = agents[:, self.sigma_prior]
+        tau = agents[:, self.tau]
 
         def update_agent(mu, sigma, tau, agent_trades):
             quantities = agent_trades[:, 0]

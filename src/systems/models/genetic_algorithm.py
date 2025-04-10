@@ -11,6 +11,7 @@ class GeneticAlgorithm(Model):
 
     def __init__(self, agents: jnp.ndarray):
         self.pop_size = len(agents)
+        self.fitness = globals.components.fitness
 
     def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
         """
@@ -29,7 +30,7 @@ class GeneticAlgorithm(Model):
 
     def informed_agents(self, agents: jnp.ndarray):
         # Evaluate fitness for each individual
-        fitnesses = agents[:, 0].copy()
+        fitnesses = agents[:, self.fitness].copy()
         min_fitness = jnp.min(fitnesses)
         if min_fitness < 0:
             adjusted_fitnesses = fitnesses - min_fitness + 1e-6
@@ -38,7 +39,7 @@ class GeneticAlgorithm(Model):
         total_fitness = jnp.sum(adjusted_fitnesses)
 
         new_population = jnp.empty_like(agents)
-        new_population[:, 0] = agents[:, 0]
+        new_population[:, self.fitness] = agents[:, self.fitness]
         params = len(agents[0]) - 1
         crossover_point = params // 2
 
@@ -87,7 +88,7 @@ class GeneticAlgorithm(Model):
 
     def uninformed_agents(self, agents: jnp.ndarray):
         # Evaluate fitness for each individual
-        fitnesses = agents[:, 0].copy()
+        fitnesses = agents[:, self.fitness].copy()
         min_fitness = jnp.min(fitnesses)
         if min_fitness < 0:
             adjusted_fitnesses = fitnesses - min_fitness + 1e-6
@@ -96,7 +97,7 @@ class GeneticAlgorithm(Model):
         total_fitness = jnp.sum(adjusted_fitnesses)
 
         new_population = jnp.empty_like(agents)
-        new_population[:, 0] = agents[:, 0]
+        new_population[:, self.fitness] = agents[:, self.fitness]
         params = len(agents[0]) - 1
         crossover_point = params // 2
 

@@ -18,21 +18,24 @@ class NeuralNetwork(Model):
     def __init__(self, agents: jnp.ndarray):
         self.models = {}
         self.agents = agents
+        self.agent_id = globals.components.agent_id
+        self.informed = globals.components.informed
+
         for agent in agents:
-            self.models[agent[globals.components.agent_id]] = {}
-            self.models[agent[globals.components.agent_id]][
-                "input_shape",
-                "hidden_layers",
-                "hidden_nodes",
-                "optimizer",
-                "epochs",
-                "loss",
-                "optimization_steps",
-            ] = agent[globals.components.learning_params]
+            self.models[agent[self.agent_id]] = {
+                "input_shape": agent[globals.components.input_shape],
+                "hidden_layers": agent[globals.components.hidden_layers],
+                "hidden_nodes": agent[globals.components.hidden_nodes],
+                "epochs": agent[globals.components.epochs],
+            }
+            self.models[agent[self.agent_id]]["optimizer"] = OPTIMIZER_REGISTRY[
+                agent[globals.components.optimizer]
+            ]
+
             learning_rate, entropy_coeff, update_frequency = agent[
-                globals.components.info_params
+                globals.components["learning_rate", "entropy_coeff", "update_frequency"]
             ]  ## Update this for new InformationDecisionPolicies
-            self.models[agent[globals.components.agent_id]][
+            self.models[agent[self.agent_id]][
                 "info_policy"
             ] = INFORMATION_POLICY_REGISTRY[
                 agent[globals.components.information_policy]
@@ -42,23 +45,24 @@ class NeuralNetwork(Model):
                 entropy_coeff=entropy_coeff,
                 update_frequency=update_frequency,
             )
-            self.models[agent[globals.components.agent_id]]["loss"] = LOSS_REGISTRY[
-                self.models[agent[globals.components.agent_id]]["loss"]
-            ](agent[globals.components.loss_params])
+            self.models[agent[self.agent_id]]["loss"] = LOSS_REGISTRY[
+                agent[globals.components.loss]
+            ](agent)
             model = self._build_model(
-                self.models[agent[globals.components.agent_id]][
-                    "input_shape", "hidden_layers", "hidden_nodes"
-                ].values()
+                [
+                    self.models[agent[self.agent_id]][k]
+                    for k in ("input_shape", "hidden_layers", "hidden_nodes")
+                ]
             )
             if config.memory_optimization:
-                path = f"models/{agent[globals.components.agent_id]}.keras"
+                path = f"models/{agent[self.agent_id]}.keras"
                 model.save(path)
-                self.models[agent[globals.components.agent_id]]["model_ref"] = path
+                self.models[agent[self.agent_id]]["model_ref"] = path
                 tf.keras.backend.clear_session()
                 del model
                 gc.collect()
             else:
-                self.models[agent[globals.components.agent_id]]["model_ref"] = model
+                self.models[agent[self.agent_id]]["model_ref"] = model
 
     def _build_model(self, params) -> tf.keras.Model:
         input_shape, hidden_layers, hidden_nodes = params
@@ -116,19 +120,15 @@ class NeuralNetwork(Model):
     def __call__(self, nn_learners: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
 
         if globals.informed:
-            nn_learners[
-                jnp.where(globals.agents[:, globals.components.informed] == 1)[0]
-            ] = self.informed_agents(
-                nn_learners[
-                    jnp.where(globals.agents[:, globals.components.informed] == 1)[0]
-                ]
+            nn_learners[jnp.where(globals.agents[:, self.informed] == 1)[0]] = (
+                self.informed_agents(
+                    nn_learners[jnp.where(globals.agents[:, self.informed] == 1)[0]]
+                )
             )
-            nn_learners[
-                jnp.where(globals.agents[:, globals.components.informed] == 0)[0]
-            ] = self.uninformed_agents(
-                nn_learners[
-                    jnp.where(globals.agents[:, globals.components.informed] == 0)[0]
-                ]
+            nn_learners[jnp.where(globals.agents[:, self.informed] == 0)[0]] = (
+                self.uninformed_agents(
+                    nn_learners[jnp.where(globals.agents[:, self.informed] == 0)[0]]
+                )
             )
 
         else:
@@ -139,7 +139,7 @@ class NeuralNetwork(Model):
     def _informed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
         for agent in nn_learners:
             X_train, y_train = self._prepare_training_data()
-            model_info = self.models[agent[globals.components.agent_id]]
+            model_info = self.models[agent[self.agent_id]]
             model: tf.keras.Model = self._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
@@ -149,10 +149,13 @@ class NeuralNetwork(Model):
     def _uninformed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
         for agent in nn_learners:
             X_train, y_train = self._prepare_uninformed_training_data()
-            model_info = self.models[agent[globals.components.agent_id]]
+            model_info = self.models[agent[self.agent_id]]
             model: tf.keras.Model = self._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
             self._save_model(model_info["model_ref"])
 
         return nn_learners
+
+
+OPTIMIZER_REGISTRY = {}

@@ -86,86 +86,70 @@ class ReinforcementLearning(InformationDecisionPolicy):
 class BayesianInfo(InformationDecisionPolicy):
     name: str = "BayesianInfo"
 
-    @staticmethod
-    def __call__(agents: jnp.ndarray) -> jnp.ndarray:
+    def __init__(self):
+        self.info_return = globals.components.info_return
+        self.uninf_return = globals.components.uninf_return
+        self.informed = globals.components.informed
+        self.fitness = globals.components.fitness
+
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
         """
         Draws from the posterior distributions in order to determine informed status.
         Draws from a binomial where p = E(Informed)/(E(Informed) + E(Uninformed))
         """
-        expected_info_return, expected_uninf_return = agents[
-            :, globals.components.info_params
-        ]
+        expected_info_return = agents[:, self.info_return]
+        expected_uninf_return = agents[:, self.uninf_return]
 
-        expected_info_return[
-            jnp.where(agents[:, globals.components.informed] == 1)[0]
-        ] = (
+        expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]] = (
             (globals.generation - 1)
-            * expected_info_return[
-                jnp.where(agents[:, globals.components.informed] == 1)[0]
-            ]
-            + agents[jnp.where(agents[:, globals.components.informed] == 1)[0]][
-                globals.components.fitness
-            ]
+            * expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]]
+            + agents[jnp.where(agents[:, self.informed] == 1)[0]][self.fitness]
         ) / globals.generation
-        expected_uninf_return[
-            jnp.where(agents[:, globals.components.informed] == 0)[0]
-        ] = (
+        expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]] = (
             (globals.generation - 1)
-            * expected_uninf_return[
-                jnp.where(agents[:, globals.components.informed] == 0)[0]
-            ]
-            + agents[jnp.where(agents[:, globals.components.informed] == 0)[0]][
-                globals.components.fitness
-            ]
+            * expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]]
+            + agents[jnp.where(agents[:, self.informed] == 0)[0]][self.fitness]
         ) / globals.generation
 
-        agents[:, globals.components.info_params[0]] = expected_info_return
-        agents[:, globals.components.info_params[1]] = expected_uninf_return
+        agents[:, self.info_return] = expected_info_return
+        agents[:, self.uninf_return] = expected_uninf_return
         p = expected_info_return / (expected_info_return + expected_uninf_return)
-        agents[:, globals.components.informed] = jnp.random.binomial(1, p, len(agents))
+        agents[:, self.informed] = jnp.random.binomial(1, p, len(agents))
         return agents
 
 
 class ThompsonSampling(InformationDecisionPolicy):
     name: str = "ThompsonSampling"
 
-    @staticmethod
-    def __call__(agents: jnp.ndarray) -> jnp.ndarray:
+    def __init__(self):
+        self.info_return = globals.components.info_return
+        self.uninf_return = globals.components.uninf_return
+        self.informed = globals.components.informed
+        self.fitness = globals.components.fitness
+
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
         """
         Draws from the posterior distributions in order to determine informed status.
         Draws from a binomial where p = E(Informed)/(E(Informed) + E(Uninformed))
         """
-        expected_info_return, expected_uninf_return = agents[
-            :, globals.components.info_params
-        ]
+        expected_info_return = agents[:, self.info_return]
+        expected_uninf_return = agents[:, self.uninf_return]
 
-        expected_info_return[
-            jnp.where(agents[:, globals.components.informed] == 1)[0]
-        ] = (
+        expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]] = (
             (globals.generation - 1)
-            * expected_info_return[
-                jnp.where(agents[:, globals.components.informed] == 1)[0]
-            ]
-            + agents[jnp.where(agents[:, globals.components.informed] == 1)[0]][
-                globals.components.fitness
-            ]
+            * expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]]
+            + agents[jnp.where(agents[:, self.informed] == 1)[0]][self.fitness]
         ) / globals.generation
-        expected_uninf_return[
-            jnp.where(agents[:, globals.components.informed] == 0)[0]
-        ] = (
+        expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]] = (
             (globals.generation - 1)
-            * expected_uninf_return[
-                jnp.where(agents[:, globals.components.informed] == 0)[0]
-            ]
-            + agents[jnp.where(agents[:, globals.components.informed] == 0)[0]][
-                globals.components.fitness
-            ]
+            * expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]]
+            + agents[jnp.where(agents[:, self.informed] == 0)[0]][self.fitness]
         ) / globals.generation
 
-        agents[:, globals.components.info_params[0]] = expected_info_return
-        agents[:, globals.components.info_params[1]] = expected_uninf_return
+        agents[:, self.info_return] = expected_info_return
+        agents[:, self.uninf_return] = expected_uninf_return
         p = expected_info_return / (expected_info_return + expected_uninf_return)
-        agents[:, globals.components.informed] = jnp.random.binomial(1, p, len(agents))
+        agents[:, self.informed] = jnp.random.binomial(1, p, len(agents))
         return agents
 
 
@@ -197,7 +181,9 @@ def register_info_policy(
         info_policies = [info_policies]
     for info_policy in info_policies:
         try:
-            assert issubclass(info_policy, InformationDecisionPolicy)
+            assert issubclass(info_policy, InformationDecisionPolicy) or isinstance(
+                info_policy, InformationDecisionPolicy
+            )
         except AssertionError:
             raise ValueError(
                 f"Custom Information policy {info_policy.name} must be a subclass of InformationDecisionPolicy"
@@ -205,9 +191,14 @@ def register_info_policy(
         INFORMATION_POLICY_REGISTRY[len(INFORMATION_POLICY_REGISTRY)] = info_policy
 
 
+def info_factory():
+    bayesian = BayesianInfo()
+    thompson = ThompsonSampling()
+    INFORMATION_POLICY_REGISTRY[1] = bayesian
+    INFORMATION_POLICY_REGISTRY[3] = thompson
+
+
 INFORMATION_POLICY_REGISTRY = {
     0: FixedInformation,
-    1: BayesianInfo,
     2: ReinforcementLearning,
-    3: ThompsonSampling,
 }

@@ -25,9 +25,10 @@ class ModelController:
                 )[0]
             ]
         )
+        bayesian = Bayesian()
         self.model_registry = {
             "genetic_algorithm": {"func": genetic_algorithm, "id": 1},
-            "Bayesian": {"func": Bayesian, "id": 2},
+            "Bayesian": {"func": bayesian, "id": 2},
             "neural_network": {"func": neural_network, "id": 3},
         }
 
