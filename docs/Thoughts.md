@@ -5,6 +5,10 @@ $$p*E(Uninformed) = E(Informed)-p*E(Informed)$$
 $$E(Informed)=p*(E(Uninformed)+E(Informed)$$
 $$p=\frac{E(Informed)}{E(Uninformed)+E(Informed)}$$
 
+~~Sample from NN to create distribution, then use for bid-ask spread~~
+Change NN to predict a probability that the agent should purchase at that price?
+- New NN model `SubjectiveDefinittianNeuralNetwork`?
+
 ### Limit order book vs Intersecting demand/supply
 
 Both?

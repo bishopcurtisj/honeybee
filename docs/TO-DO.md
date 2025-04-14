@@ -11,7 +11,7 @@
 - [x] Add registration function wrappers to experiment.py
 - [x] Update the functions that call systems so that they can store and include extra params.
 	- [x] Update learning.py to better match other systems 
-- [ ] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
+- [x] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
 - [x] Replace components.id with components.agent_id
 - [ ] Fix genetic algorithm so that it uses the correct indices rather than hard coded ones that may or may not be wrong.
 	- [ ] How to handle num_params?
@@ -24,7 +24,7 @@
 - [x] Work on documentation, start making not of what fields each module requires agents to have.
 	- [x] Add acceptable values to components
 	- [x] Add acceptable pairings of functions to models
-
+- [x] Implement Neural Network agent demand / spread
 - [ ] Rewrite agent_constructor.py using new fields
 	- [x] Update Demand/Learning Algorithm and demand/info parameters
 	- [x] Need to redo how `AgentInfo` handles function parameters.
@@ -68,6 +68,7 @@
 	- [x] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?
 - [x] Revisit RL information policy
 - [ ] Add ability for Neural Network to set spread
+	- [ ] For now just using a dummy approach, will refactor once I decide how I want to approach this.
 
 ### Bayesians
 
@@ -82,3 +83,4 @@
 - [x] Need to refactor calculations to change from one-size fits all approach
 - [x] Need to implement updating function
 - [x] Implement logic for when multiple agents are passed to BayesianDemand
+- [ ] Add tau calculation
