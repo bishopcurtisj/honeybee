@@ -18,6 +18,12 @@ class Market(ABC):
     last_price: float
     mean_price: float
 
+    def __getitem__(self, key):
+        """Allow dict-like access."""
+        if isinstance(key, str):
+            return getattr(self, key, None)
+        raise KeyError(f"Invalid key: {key}")
+
     @abstractmethod
     def new_period(self):
         """Prepare the market for a new period/generation"""
@@ -38,6 +44,7 @@ class GSOrderMarket(Market):
     demand_at_p0: float = np.inf
     last_price: jnp.ndarray = jnp.zeros(repetitions)
     mean_price: jnp.ndarray = jnp.zeros(repetitions)
+    price_std: jnp.ndarray = jnp.zeros(repetitions)
 
     def new_period(self):
         self.last_period_price = self.price

@@ -70,7 +70,7 @@ def calculate_returns(agents: jnp.ndarray, trades: jnp.ndarray) -> jnp.ndarray:
     (Agent, repetition, [quantity, total spendings])
     """
     returns = (
-        trades[:, :, 0] * globals.market.mean_price
+        trades[:, :, 0] * globals.market[config.benchmark_price]
         - trades[:, :, 1]
         - globals.market.cost_of_info * agents[:, 0]
     )

@@ -1,0 +1,5 @@
+,fitness,informed,signal,bid,ask,bid_quantity,ask_quantity,demand,demand_function,objective_function,utility_function,risk_aversion,learning_algorithm,spread_function,confidence,loss,information_policy,agent_type,agent_id,mu_prior,sigma_prior,tau,hidden_layers,hidden_nodes,epochs,optimizer,learning_rate,entropy_coeff,update_frequency,info_return,uninf_return,beta0,beta1
+0,0,0,0,0,0,0,0,0,2,1,1,2,2,2,0.05,0,1,0,1,10,2,1,0,0,0,0,0.0,0.0,0,0,0,0,0
+1,0,1,0,0,0,0,0,0,2,1,1,2,2,2,0.1,0,1,0,2,12,3,1,0,0,0,0,0.0,0.0,0,0,0,0,0
+2,0,0,0,0,0,0,0,0,3,1,1,2,3,3,0.2,1,2,0,3,0,0,0,1,16,5,1,0.01,0.05,1,0,0,0,0
+3,0,1,0,0,0,0,0,0,3,1,1,2,3,3,0.05,1,2,0,4,0,0,0,2,16,5,1,0.001,0.07,1,0,0,0,0

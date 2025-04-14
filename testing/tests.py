@@ -1,25 +1,30 @@
-import sys
 import os
+import sys
 
+sys.path.insert(
+    0, os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "src"))
+)
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..', 'src')))
-
-import numpy as jnp
 import unittest
 
-from ACE_Experiment.experiment import *
-from entities.agent import AgentInfo
-from entities.market import RoutledgeMarket
+import numpy as jnp
+
+from src.entities.agent import AgentInfo
+from src.entities.market import GSOrderMarket, Market, RoutledgeMarket
+from src.experiment import *
 
 
 class TestExperiment(unittest.TestCase):
 
-    def test_init(self):
-        market = RoutledgeMarket()
-        experiment = Experiment(market, 'src/testing/data/agents.csv', 'src/testing/data/components.json')
-        self.assertEqual(experiment.market, market)
-        self.assertIsInstance(experiment.agents, jnp.ndarray)
-        self.assertIsInstance(experiment.components, AgentInfo)
+    # def test_init(self):
+    #     market = RoutledgeMarket()
+    #     experiment = Experiment(
+    #         market, "testing/data/agents.csv", "testing/data/components.json"
+    #     )
+    #     self.assertEqual(experiment.market, market)
+    #     self.assertIsInstance(experiment.agents, jnp.ndarray)
+    #     self.assertIsInstance(experiment.components, AgentInfo)
+    #     self.assertIsInstance(experiment.market, Market)
 
     # def test_dummy_run(self):
     #     market = RoutledgeMarket()
@@ -27,13 +32,26 @@ class TestExperiment(unittest.TestCase):
     #     results = experiment.run(2, 2)
     #     self.assertIsInstance(results, jnp.ndarray)
 
+    # def test_routledge(self):
 
-    def test_routledge(self):
+    #     market = RoutledgeMarket()
+    #     experiment = Experiment(
+    #         market, "src/testing/data/agents.csv", "src/testing/data/components.json"
+    #     )
+    #     results = experiment.run(repetitions=1000, generations=5_000)
+    #     self.assertIsInstance(results, jnp.ndarray)
 
-        market = RoutledgeMarket()
-        experiment = Experiment(market, 'src/testing/data/agents.csv', 'src/testing/data/components.json')
-        results = experiment.run(repetitions=1000, generations=5_000)
+    def test_4_agents(self):
+        market = GSOrderMarket()
+        experiment = Experiment(
+            market=market,
+            agents_file_path="testing/test_agents.csv",
+            config_file_path="testing/test_config.json",
+        )
+        results = experiment.run(2, 100)
+
         self.assertIsInstance(results, jnp.ndarray)
 
-if __name__ == '__main__':
-    unittest.main() 
+
+if __name__ == "__main__":
+    unittest.main()

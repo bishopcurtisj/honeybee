@@ -7,7 +7,7 @@ import numpy as np
 from entities.agent import AgentInfo
 from entities.market import Market
 from src.globals import config, globals
-from systems.agent_functions.demand import Demand
+from systems.agent_functions.demand import Demand, demand_factory
 from systems.agent_functions.demand import register_demand_function as register_demand
 from systems.agent_functions.objective import Objective, calculate_fitness
 from systems.agent_functions.objective import (
@@ -15,6 +15,7 @@ from systems.agent_functions.objective import (
 )
 from systems.agent_functions.spread import SPREAD_REGISTRY, Spread
 from systems.agent_functions.spread import register_spread_function as register_spread
+from systems.agent_functions.spread import spread_factory
 from systems.agent_functions.utility import Utility
 from systems.agent_functions.utility import (
     register_utility_function as register_utility,
@@ -22,6 +23,7 @@ from systems.agent_functions.utility import (
 from systems.learning import model_controller
 from systems.models.information_policy import (
     InformationDecisionPolicy,
+    info_factory,
     register_info_policy,
 )
 from systems.models.loss import AgentLoss, register_loss
@@ -60,6 +62,9 @@ class Experiment:
             print("Config file not found. Using default values")
 
         model_controller.init_models(globals.agents, globals.components)
+        demand_factory()
+        spread_factory()
+        info_factory()
 
     def run(self, generations: int = 20, repetitions: int = 100):
 
@@ -182,7 +187,6 @@ class Experiment:
 
         subset = calculate_fitness(
             subset,
-            config.repetitions,
             trades,
             globals.agents[traders][:, globals.components.risk_aversion],
         )

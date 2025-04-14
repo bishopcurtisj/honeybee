@@ -26,18 +26,13 @@ class Config:
     max_price: float
     memory_optimization: bool = True
     save_models: bool = True
+    bootstraps: int
+    benchmark_price: str  # Should map to a field of Market
 
     def from_json(self, json_path: str):
         with open(json_path) as f:
-            config = json.load(f)
-        self.uninformed_base_ratio = config["uninformed_base_ratio"]
-        self.mutation_rate = config["mutation_rate"]
-        self.crossover_rate = config["crossover_rate"]
-        self.generations = config["generations"]
-        self.repetitions = config["repetitions"]
-        self.GAMMA_CONSTANTS = config["GAMMA_CONSTANTS"]
-        self.max_price = config["max_price"]
-        self.memory_optimization = config["memory_optimization"]
+            config_dict = json.load(f)
+        self.__dict__.update(config_dict)
 
 
 globals = Globals()
