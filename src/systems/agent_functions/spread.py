@@ -6,6 +6,8 @@ from jax.scipy.stats import norm
 
 from src.globals import config, globals
 from systems.agent_functions.demand import DEMAND_REGISTRY
+from systems.learning import model_controller
+from systems.models.neural_network import NeuralNetwork
 
 
 class Spread(ABC):
@@ -158,7 +160,37 @@ class BayesianSpread(Spread):
         return agents
 
 
-class NNSpread(Spread): ...
+class NNSpread(Spread):
+    """
+    This a placeholder implementation
+    """
+
+    def __init__(self):
+        self.agent_id = globals.components.agent_id
+        self.neural_network: NeuralNetwork = model_controller.model_registry[
+            "neural_network"
+        ]
+        self.risk_aversion = globals.components.risk_aversion
+        self.bid = globals.components.bid
+        self.ask = globals.components.ask
+        self.bid_quantity = globals.components.bid_quantity
+        self.ask_quantity = globals.components.ask_quantity
+        self.demand_function = globals.components.demand_function
+        self.confidence = globals.components.confidence
+
+    def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
+
+        agents[:, self.bid] = (1 - agents[:, self.confidence]) * globals.market[
+            config.benchmark_price
+        ]
+        agents[:, self.ask] = (1 + agents[:, self.confidence]) * globals.market[
+            config.benchmark_price
+        ]
+
+        agents[:, self.ask_quantity] = DEMAND_REGISTRY[3](agents, agents[:, self.ask])
+        agents[:, self.bid_quantity] = DEMAND_REGISTRY[3](agents, agents[:, self.bid])
+
+        return agents
 
 
 def register_spread_function(spread_functions: Union[List[Spread], Spread]):

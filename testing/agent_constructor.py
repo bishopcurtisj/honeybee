@@ -30,7 +30,7 @@ def test_agent_constructor():
     spread_function = np.empty(POP_SIZE)
     confidence = np.empty(POP_SIZE)
     loss = [1 if x == 3 else 0 for x in learning_algorithm]
-    loss_params = [x if y == 1 else 0 for x, y in zip(risk_aversion, loss)]
+
     information_policy = np.empty(POP_SIZE)
 
     for i in range(POP_SIZE):
@@ -78,7 +78,6 @@ def test_agent_constructor():
             "bid_quantity": bid_quantity,
             "ask_quantity": ask_quantity,
             "loss": loss,
-            "loss_params": loss_params,
             "spread_function": spread_function,
             "confidence": confidence,
             "information_policy": information_policy,
@@ -177,7 +176,86 @@ def routledge_agent_constructor():
     agents.to_csv("agents.csv", index=False)
 
 
+def test_constructor():
+
+    POP_SIZE = 4
+
+    fitness = [0] * POP_SIZE
+    informed = [0, 1, 0, 1]
+    signal = [0] * POP_SIZE
+    bid = [0] * POP_SIZE
+    ask = [0] * POP_SIZE
+    bid_quantity = [0] * POP_SIZE
+    ask_quantity = [0] * POP_SIZE
+    demand = [0] * POP_SIZE
+    demand_function = [2, 2, 3, 3]
+    objective_function = [1] * POP_SIZE
+    utility_function = [1] * POP_SIZE
+    risk_aversion = [2, 2, 2, 2]
+    learning_algorithm = [2, 2, 3, 3]
+    spread_function = [2, 2, 3, 3]
+    confidence = [0.05, 0.1, 0.2, 0.05]
+    loss = [0, 0, 1, 1]
+    information_policy = [1, 1, 2, 2]
+    agent_type = [0] * POP_SIZE
+    agent_id = [1, 2, 3, 4]
+    mu_prior = [10, 12, 0, 0]
+    sigma_prior = [2, 3, 0, 0]
+    tau = [1, 1, 0, 0]
+    hidden_layers = [0, 0, 1, 2]
+    hidden_nodes = [0, 0, 16, 16]
+    epochs = [0, 0, 5, 5]
+    optimizer = [0, 0, 1, 1]
+    learning_rate = [0, 0, 0.01, 0.001]
+    entropy_coeff = [0, 0, 0.05, 0.07]
+    update_frequency = [0, 0, 1, 1]
+    info_return = [0] * POP_SIZE
+    uninf_return = [0] * POP_SIZE
+    beta0 = [0] * POP_SIZE
+    beta1 = [0] * POP_SIZE
+
+    agents = pd.DataFrame(
+        {
+            "fitness": fitness,
+            "informed": informed,
+            "signal": signal,
+            "bid": bid,
+            "ask": ask,
+            "bid_quantity": bid_quantity,
+            "ask_quantity": ask_quantity,
+            "demand": demand,
+            "demand_function": demand_function,
+            "objective_function": objective_function,
+            "utility_function": utility_function,
+            "risk_aversion": risk_aversion,
+            "learning_algorithm": learning_algorithm,
+            "spread_function": spread_function,
+            "confidence": confidence,
+            "loss": loss,
+            "information_policy": information_policy,
+            "agent_type": agent_type,
+            "agent_id": agent_id,
+            "mu_prior": mu_prior,
+            "sigma_prior": sigma_prior,
+            "tau": tau,
+            "hidden_layers": hidden_layers,
+            "hidden_nodes": hidden_nodes,
+            "epochs": epochs,
+            "optimizer": optimizer,
+            "learning_rate": learning_rate,
+            "entropy_coeff": entropy_coeff,
+            "update_frequency": update_frequency,
+            "info_return": info_return,
+            "uninf_return": uninf_return,
+            "beta0": beta0,
+            "beta1": beta1,
+        }
+    )
+    agents.to_csv("test_agents.csv")
+
+
 if __name__ == "__main__":
     # test_agent_constructor()
-    routledge_agent_constructor()
-    dummy_agent_constructor()
+    # routledge_agent_constructor()
+    # dummy_agent_constructor()
+    test_constructor()

@@ -158,4 +158,4 @@ class NeuralNetwork(Model):
         return nn_learners
 
 
-OPTIMIZER_REGISTRY = {}
+OPTIMIZER_REGISTRY = {1: "adam"}

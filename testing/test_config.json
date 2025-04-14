@@ -1,0 +1,13 @@
+{
+    "uninformed_base_ratio": 0,
+    "mutation_rate": 0,
+    "crossover_rate": 0,
+    "generations": 2,
+    "repetitions": 100,
+    "GAMMA_CONSTANTS": [0,0],
+    "max_price": 1000,
+    "memory_optimization": true,
+    "save_models": false,
+    "bootstraps": 10,
+    "benchmark_price": "mean_price" 
+}
