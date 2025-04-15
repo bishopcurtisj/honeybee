@@ -9,9 +9,9 @@ import unittest
 
 import numpy as jnp
 
-from src.entities.agent import AgentInfo
-from src.entities.market import GSOrderMarket, Market, RoutledgeMarket
-from src.experiment import *
+from entities.agent import AgentInfo
+from entities.market import GSOrderMarket
+from experiment import *
 
 
 class TestExperiment(unittest.TestCase):

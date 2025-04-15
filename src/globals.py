@@ -17,17 +17,17 @@ class Globals:
 
 
 class Config:
-    uninformed_base_ratio: float
-    mutation_rate: float
-    crossover_rate: float
-    generations: int
-    repetitions: int
-    GAMMA_CONSTANTS: List
-    max_price: float
+    uninformed_base_ratio: float = 0
+    mutation_rate: float = 0
+    crossover_rate: float = 0
+    generations: int = 2
+    repetitions: int = 100
+    GAMMA_CONSTANTS: List = [0, 0]
+    max_price: float = 1000
     memory_optimization: bool = True
     save_models: bool = True
-    bootstraps: int
-    benchmark_price: str  # Should map to a field of Market
+    bootstraps: int = 10
+    benchmark_price: str = "mean_price"  # Should map to a field of Market
 
     def from_json(self, json_path: str):
         with open(json_path) as f:

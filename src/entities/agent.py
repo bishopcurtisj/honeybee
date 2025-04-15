@@ -13,6 +13,11 @@ class AgentInfo:
             return getattr(self, key, None)
         elif isinstance(key, int) and 0 <= key < len(self._columns):
             return self._columns[key]
+        elif isinstance(key, list):
+            attributes = []
+            for k in key:
+                attributes.append(self.__getitem__(k))
+                return tuple(attributes)
         raise KeyError(f"Invalid key: {key}")
 
     def add(self, name, index):

@@ -25,7 +25,7 @@ class AgentLoss(tf.keras.losses.Loss, metaclass=ABCMeta):
         raise NotImplementedError
 
     def __init__(self, *args, **kwargs):
-        super().__init__(reduction=self.reduction, name=self.name, **kwargs)
+        super().__init__(reduction=self.reduction, name=self.name)
 
     @abstractmethod
     def get_config(self):
@@ -39,7 +39,7 @@ class NegCARA(AgentLoss):
     reduction: tf.keras.losses.Reduction = tf.keras.losses.Reduction.SUM_OVER_BATCH_SIZE
 
     def __init__(self, *args, **kwargs):
-        super().__init__(reduction=self.reduction, name=self.name, **kwargs)
+        super().__init__(reduction=self.reduction, name=self.name)
         agent = args[0]
         self.risk_aversion = agent[globals.components.risk_aversion]
 
