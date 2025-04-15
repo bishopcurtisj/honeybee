@@ -2,7 +2,7 @@ from typing import List, Union
 
 import numpy as jnp
 
-from src.globals import globals
+from globals import globals
 from systems.models.bayesian import Bayesian
 from systems.models.genetic_algorithm import GeneticAlgorithm
 from systems.models.model import Model

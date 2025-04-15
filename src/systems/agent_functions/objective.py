@@ -3,7 +3,7 @@ from typing import List, Union
 
 import numpy as jnp
 
-from src.globals import config, globals
+from globals import config, globals
 from systems.agent_functions.utility import calculate_utility
 
 

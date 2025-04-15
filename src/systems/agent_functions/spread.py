@@ -4,7 +4,7 @@ from typing import List, Union
 import numpy as jnp
 from jax.scipy.stats import norm
 
-from src.globals import config, globals
+from globals import config, globals
 from systems.agent_functions.demand import DEMAND_REGISTRY
 from systems.learning import model_controller
 from systems.models.neural_network import NeuralNetwork

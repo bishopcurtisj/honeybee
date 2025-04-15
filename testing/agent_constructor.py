@@ -202,6 +202,7 @@ def test_constructor():
     mu_prior = [10, 12, 0, 0]
     sigma_prior = [2, 3, 0, 0]
     tau = [1, 1, 0, 0]
+    input_shape = [0, 0, 1, 1]
     hidden_layers = [0, 0, 1, 2]
     hidden_nodes = [0, 0, 16, 16]
     epochs = [0, 0, 5, 5]
@@ -238,6 +239,7 @@ def test_constructor():
             "mu_prior": mu_prior,
             "sigma_prior": sigma_prior,
             "tau": tau,
+            "input_shape": input_shape,
             "hidden_layers": hidden_layers,
             "hidden_nodes": hidden_nodes,
             "epochs": epochs,

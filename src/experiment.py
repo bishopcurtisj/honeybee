@@ -6,7 +6,7 @@ import numpy as np
 
 from entities.agent import AgentInfo
 from entities.market import Market
-from src.globals import config, globals
+from globals import config, globals
 from systems.agent_functions.demand import Demand, demand_factory
 from systems.agent_functions.demand import register_demand_function as register_demand
 from systems.agent_functions.objective import Objective, calculate_fitness
@@ -61,7 +61,7 @@ class Experiment:
         except FileNotFoundError:
             print("Config file not found. Using default values")
 
-        model_controller.init_models(globals.agents, globals.components)
+        model_controller.init_models()
         demand_factory()
         spread_factory()
         info_factory()
@@ -70,6 +70,9 @@ class Experiment:
 
         config.generations = generations
         config.repetitions = repetitions
+
+        globals.market.repetitions = repetitions
+        globals.market.generations = generations
         globals.generation = 1
 
         for _ in range(generations):

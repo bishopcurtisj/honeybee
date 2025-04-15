@@ -4,7 +4,7 @@ from functools import singledispatch
 import numpy as jnp
 import tensorflow as tf
 
-from src.globals import config, globals
+from globals import config, globals
 from systems.models.information_policy import INFORMATION_POLICY_REGISTRY
 from systems.models.loss import LOSS_REGISTRY
 from systems.models.model import Model
@@ -31,10 +31,11 @@ class NeuralNetwork(Model):
             self.models[agent[self.agent_id]]["optimizer"] = OPTIMIZER_REGISTRY[
                 agent[globals.components.optimizer]
             ]
+            ## Update this for new InformationDecisionPolicies
+            learning_rate = agent[globals.components["learning_rate"]]
+            entropy_coeff = agent[globals.components["entropy_coff"]]
+            update_frequency = agent[globals.components["update_frequency"]]
 
-            learning_rate, entropy_coeff, update_frequency = agent[
-                globals.components["learning_rate", "entropy_coeff", "update_frequency"]
-            ]  ## Update this for new InformationDecisionPolicies
             self.models[agent[self.agent_id]][
                 "info_policy"
             ] = INFORMATION_POLICY_REGISTRY[

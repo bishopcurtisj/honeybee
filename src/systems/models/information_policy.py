@@ -6,7 +6,7 @@ import numpy as jnp
 import numpy as np
 import tensorflow as tf
 
-from src.globals import config, globals
+from globals import config, globals
 
 
 class InformationDecisionPolicy(ABC):
@@ -160,7 +160,6 @@ class FixedInformation(InformationDecisionPolicy):
 
     name: str = "FixedInformation"
 
-    @staticmethod
     @singledispatch
     def __call__(agents, *args, **kwargs):
         raise TypeError(f"Unsupported type {type(agents)}")
@@ -192,13 +191,14 @@ def register_info_policy(
 
 
 def info_factory():
+    fixed = FixedInformation()
     bayesian = BayesianInfo()
     thompson = ThompsonSampling()
+    INFORMATION_POLICY_REGISTRY[0] = fixed
     INFORMATION_POLICY_REGISTRY[1] = bayesian
     INFORMATION_POLICY_REGISTRY[3] = thompson
 
 
 INFORMATION_POLICY_REGISTRY = {
-    0: FixedInformation,
     2: ReinforcementLearning,
 }
