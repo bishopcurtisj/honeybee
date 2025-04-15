@@ -2,7 +2,7 @@
 - [x] Finish Experiment Driver (Testing Phase)
 - [x] Finish Controller / Decide what to do about Controller (Testing Phase)
 - [x] Write testing script
-- [x] Move signal from agents ndarray to market
+- [x] Move signal from agents `ndarray` to market
 - [x] Refactor
 - [x] Replace magic numbers with names representing ID's
 - [x] Figure out why pass by reference isn't allowing for the changes to agents by the controller to be reflected in the experiment.
@@ -12,11 +12,12 @@
 - [x] Update the functions that call systems so that they can store and include extra params.
 	- [x] Update learning.py to better match other systems 
 - [x] Update the calculations of returns to use a function stored in market so that this change can be made by users easier
-- [x] Replace components.id with components.agent_id
+- [x] Replace components.id with `components`.`agent_id`
 - [ ] Fix genetic algorithm so that it uses the correct indices rather than hard coded ones that may or may not be wrong.
-	- [ ] How to handle num_params?
+	- [ ] How to handle `num_params`?
 - [x] Refactor to remove magic numbers
 - [ ] As more utility/objective functions are added, consider refactoring to match demand/spread
+- [ ] Fix NN input shape
 
 
 ## Requirements for alpha

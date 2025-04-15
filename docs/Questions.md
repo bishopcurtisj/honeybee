@@ -1,4 +1,7 @@
 
+
+How to set NN agent spread?
+
 Should informed agents instead be able to adjust their behavior for the current period after seeing results of some of the paths.
 
 
