@@ -1,4 +1,5 @@
 import gc
+import os
 from functools import singledispatch
 
 import numpy as jnp
@@ -56,7 +57,9 @@ class NeuralNetwork(Model):
                 ]
             )
             if config.memory_optimization:
-                path = f"models/{agent[self.agent_id]}.keras"
+                if not os.path.exists("model_paths"):
+                    os.mkdir("model_paths")
+                path = f"model_paths/{agent[self.agent_id]}.keras"
                 model.save(path)
                 self.models[agent[self.agent_id]]["model_ref"] = path
                 tf.keras.backend.clear_session()
@@ -67,11 +70,11 @@ class NeuralNetwork(Model):
 
     def _build_model(self, params) -> tf.keras.Model:
         input_shape, hidden_layers, hidden_nodes = params
-        inputs = tf.keras.Input(shape=(input_shape,))
-        x = tf.keras.layers.Dense(hidden_nodes, activation="relu")(inputs)
+        inputs = tf.keras.Input(shape=(int(input_shape),))
+        x = tf.keras.layers.Dense(int(hidden_nodes), activation="relu")(inputs)
 
-        for _ in range(hidden_layers - 1):
-            x = tf.keras.layers.Dense(hidden_nodes, activation="relu")(x)
+        for _ in range(int(hidden_layers) - 1):
+            x = tf.keras.layers.Dense(int(hidden_nodes), activation="relu")(x)
 
         output = tf.keras.layers.Dense(1, activation="linear")(x)
 
@@ -79,30 +82,30 @@ class NeuralNetwork(Model):
         return model
 
     @singledispatch
-    def _load_model(self, model_ref) -> tf.keras.Model:
+    def _load_model(model_ref) -> tf.keras.Model:
         raise TypeError(f"Unsupported type {type(model_ref)}")
 
     @_load_model.register
-    def _(self, model_ref: str) -> tf.keras.Model:
+    def _(model_ref: str) -> tf.keras.Model:
         return tf.keras.models.load_model(model_ref)
 
     @_load_model.register
-    def _(self, model_ref: tf.keras.models.Model) -> tf.keras.Model:
+    def _(model_ref: tf.keras.models.Model) -> tf.keras.Model:
         return model_ref
 
     @singledispatch
-    def _save_model(self, model_ref, model: tf.keras.models.Model, agent_id: int):
+    def _save_model(model_ref, model: tf.keras.models.Model, agent_id: int):
         raise TypeError(f"Unsupported type {type(model_ref)}")
 
     @_save_model.register
-    def _(self, model_ref: str, model: tf.keras.models.Model):
+    def _(model_ref: str, model: tf.keras.models.Model):
         model.save(model_ref)
         tf.keras.backend.clear_session()  # 1 flush Keras’ global graph state  :contentReference[oaicite:0]{index=0}
         del model  # 2 drop Python reference  :contentReference[oaicite:1]{index=1}
         gc.collect()  # 3 ask the GC to reclaim immediately
 
     @_save_model.register
-    def _(self, model_ref: tf.keras.models.Model, model: tf.keras.models.Model):
+    def _(model_ref: tf.keras.models.Model, model: tf.keras.models.Model):
         pass
 
     def _prepare_training_data(
@@ -141,22 +144,34 @@ class NeuralNetwork(Model):
         for agent in nn_learners:
             X_train, y_train = self._prepare_training_data()
             model_info = self.models[agent[self.agent_id]]
-            model: tf.keras.Model = self._load_model(model_info["model_ref"])
+            model: tf.keras.Model = NeuralNetwork._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
 
             agent = model_info["info_policy"](agent)
+            NeuralNetwork._save_model(model_info["model_ref"])
+
+        return nn_learners
 
     def _uninformed(self, nn_learners: jnp.ndarray) -> jnp.ndarray:
         for agent in nn_learners:
             X_train, y_train = self._prepare_uninformed_training_data()
             model_info = self.models[agent[self.agent_id]]
-            model: tf.keras.Model = self._load_model(model_info["model_ref"])
+            model: tf.keras.Model = NeuralNetwork._load_model(model_info["model_ref"])
             model.compile(optimizer=model_info["optimizer"], loss=model_info["loss"])
             model.fit(X_train, y_train, epochs=model_info["epochs"])
-            self._save_model(model_info["model_ref"])
+            NeuralNetwork._save_model(model_info["model_ref"])
 
         return nn_learners
+
+    def save(self):
+        if not config.memory_optimization:
+            if not os.path.exists("model_paths"):
+                os.mkdir("model_paths")
+            for agent in self.agents:
+                path = f"model_paths/{agent[self.agent_id]}.keras"
+                model = self.models[agent[self.agent_id]]["model_ref"]
+                model.save(path)
 
 
 OPTIMIZER_REGISTRY = {1: "adam"}

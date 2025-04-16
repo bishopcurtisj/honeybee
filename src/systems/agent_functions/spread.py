@@ -21,7 +21,8 @@ class LinearDemandSpread(Spread):
     name = "LinearDemandSpread"
 
     def __init__(self):
-        self.informed = globals.components.informed
+        if globals.informed:
+            self.informed = globals.components.informed
         self.signal = globals.components.signal
         self.bid = globals.components.bid
         self.ask = globals.components.ask
@@ -31,6 +32,11 @@ class LinearDemandSpread(Spread):
         self.confidence = globals.components.confidence
         self.beta0 = globals.components.beta0
         self.beta1 = globals.components.beta1
+        self.demand_functions = jnp.unique(
+            globals.agents[
+                jnp.where(globals.agents[:, globals.components.spread_function] == 1)[0]
+            ][:, self.demand_function]
+        )
 
     def __call__(self, agents: jnp.ndarray) -> float:
         """
@@ -131,6 +137,11 @@ class BayesianSpread(Spread):
         self.mu_prior = globals.components.mu_prior
         self.sigma_prior = globals.components.sigma_prior
         self.tau = globals.components.tau
+        self.demand_functions = jnp.unique(
+            globals.agents[
+                jnp.where(globals.agents[:, globals.components.spread_function] == 2)[0]
+            ][:, self.demand_function]
+        )
 
     def __call__(self, agents: jnp.ndarray) -> float:
         """
@@ -138,6 +149,7 @@ class BayesianSpread(Spread):
         agents should have the following columns:
         [informed, signal, bid, ask, bid_quantity, ask_quantity, demand_function, confidence, demand_function_params...]
         """
+
         p = agents[:, self.confidence] / 2
         agents[:, self.bid] = agents[:, self.mu_prior] + agents[
             :, self.sigma_prior
@@ -145,17 +157,21 @@ class BayesianSpread(Spread):
         agents[:, self.ask] = agents[:, self.mu_prior] + agents[
             :, self.sigma_prior
         ] * norm.ppf(1 - p)
-        for i in DEMAND_REGISTRY.keys():
-            same_demand = jnp.where(agents[self.demand_function] == i)[0]
-            agents[same_demand[:, None]][self.bid_quantity] = DEMAND_REGISTRY[i](
-                agents[same_demand][:, self.bid],
-                True,
-                agents[same_demand][:, [self.mu_prior, self.sigma_prior, self.tau]],
+        for i in self.demand_functions:
+            same_demand = jnp.where(agents[:, self.demand_function] == i)[0]
+            agents[same_demand, self.bid_quantity] = DEMAND_REGISTRY[i](
+                price=agents[same_demand][:, self.bid],
+                bid=True,
+                params=agents[same_demand][
+                    :, [self.mu_prior, self.sigma_prior, self.tau]
+                ],
             )
-            agents[same_demand[:, None]][self.ask_quantity] = DEMAND_REGISTRY[i](
-                agents[same_demand][:, self.ask],
-                False,
-                agents[same_demand][:, [self.mu_prior, self.sigma_prior, self.tau]],
+            agents[same_demand, self.ask_quantity] = DEMAND_REGISTRY[i](
+                price=agents[same_demand][:, self.ask],
+                bid=False,
+                params=agents[same_demand][
+                    :, [self.mu_prior, self.sigma_prior, self.tau]
+                ],
             )
         return agents
 
@@ -167,9 +183,7 @@ class NNSpread(Spread):
 
     def __init__(self):
         self.agent_id = globals.components.agent_id
-        self.neural_network: NeuralNetwork = model_controller.model_registry[
-            "neural_network"
-        ]
+        self.neural_network: NeuralNetwork = model_controller.model_registry[3]
         self.risk_aversion = globals.components.risk_aversion
         self.bid = globals.components.bid
         self.ask = globals.components.ask
@@ -178,14 +192,20 @@ class NNSpread(Spread):
         self.demand_function = globals.components.demand_function
         self.confidence = globals.components.confidence
 
+        self.demand_functions = jnp.unique(
+            globals.agents[
+                jnp.where(globals.agents[:, globals.components.spread_function] == 3)[0]
+            ][:, self.demand_function]
+        )
+
     def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
 
         agents[:, self.bid] = (1 - agents[:, self.confidence]) * globals.market[
             config.benchmark_price
-        ]
+        ][globals.repetition]
         agents[:, self.ask] = (1 + agents[:, self.confidence]) * globals.market[
             config.benchmark_price
-        ]
+        ][globals.repetition]
 
         agents[:, self.ask_quantity] = DEMAND_REGISTRY[3](agents, agents[:, self.ask])
         agents[:, self.bid_quantity] = DEMAND_REGISTRY[3](agents, agents[:, self.bid])
@@ -212,13 +232,12 @@ def register_spread_function(spread_functions: Union[List[Spread], Spread]):
 
 
 def spread_factory():
+
     linear_spread = LinearDemandSpread()
     bayesian_spread = BayesianSpread()
     nn_spread = NNSpread()
 
-    SPREAD_REGISTRY[1] = linear_spread
-    SPREAD_REGISTRY[2] = bayesian_spread
-    SPREAD_REGISTRY[3] = nn_spread
+    SPREAD_REGISTRY.update({1: linear_spread, 2: bayesian_spread, 3: nn_spread})
 
 
 SPREAD_REGISTRY = {}

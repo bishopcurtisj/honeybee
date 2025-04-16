@@ -4,6 +4,8 @@ from itertools import chain
 import numpy as jnp
 from sortedcontainers import SortedDict
 
+from globals import globals
+
 
 class Order:
     __slots__ = ("trader_id", "price", "quantity")
@@ -38,6 +40,8 @@ class OrderBook:
 
     def add_order(self, trader_id: str, price: float, quantity: float):
         order = Order(trader_id, price, quantity)
+        if trader_id not in self.agent_trades.keys():
+            self.agent_trades[trader_id] = []
 
         order = self.match_orders(order)
         if order.quantity == 0:
@@ -58,8 +62,15 @@ class OrderBook:
 
     def match_orders(self, order: Order) -> Order:
 
-        best_bid = -next(iter(self.buy_orders))
-        best_ask = next(iter(self.sell_orders))
+        # need to fix
+        try:
+            best_bid = next(iter(self.buy_orders))
+        except StopIteration:
+            best_bid = -1
+        try:
+            best_ask = next(iter(self.sell_orders))
+        except StopIteration:
+            best_ask = jnp.inf
 
         if order.quantity < 0:
             # sell order
@@ -124,6 +135,12 @@ class OrderBook:
         """
         trades = list(chain.from_iterable(self.agent_trades.values()))
         trades = jnp.array(trades)
+        if len(trades) == 0:
+            print(
+                f"No trades occured in repetition: {globals.repetition} of generation: {globals.generation}"
+            )
+            return jnp.array([0, 0, 0])
+
         mean_price = jnp.mean(trades[:, 1])
         returns = (trades[:, 1] - mean_price) * (
             -1 * trades[:, 0] / jnp.abs(trades[:, 0])

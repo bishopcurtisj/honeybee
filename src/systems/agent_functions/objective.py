@@ -48,13 +48,15 @@ def calculate_fitness(
     agents should have the following columns:
     [fitness, objective_function, utility_function, informed, signal, demand, demand_function, demand_function_params...]
     """
-    returns = calculate_returns(agents, config.repetitions, trades)
+    returns = calculate_returns(agents, trades)
     utilities = calculate_utility(agents, returns, risk_aversion)
 
     for i in OBJECTIVE_REGISTRY.keys():
-        same_objective = jnp.where(agents[:, 1] == i)
-        agents[same_objective[:, None], 0] = OBJECTIVE_REGISTRY[i](
-            utilities, risk_aversion
+        same_objective = jnp.where(
+            agents[:, globals.components.objective_function] == i
+        )
+        agents[same_objective[:, None], globals.components.fitness] = (
+            OBJECTIVE_REGISTRY[i](utilities, risk_aversion)
         )
 
     return agents
@@ -65,16 +67,16 @@ def calculate_returns(agents: jnp.ndarray, trades: jnp.ndarray) -> jnp.ndarray:
     """
     Calculate the returns of a set of agents
     agents should have the following columns:
-    [informed, ...]
+
     trades should have the following shape
     (Agent, repetition, [quantity, total spendings])
     """
     returns = (
         trades[:, :, 0] * globals.market[config.benchmark_price]
         - trades[:, :, 1]
-        - globals.market.cost_of_info * agents[:, 0]
+        - globals.market.cost_of_info * agents[:, globals.components.informed]
     )
     return returns
 
 
-OBJECTIVE_REGISTRY = {1: Mean_variance}
+OBJECTIVE_REGISTRY = {1: Mean_variance()}
