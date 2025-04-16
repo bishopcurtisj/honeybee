@@ -17,7 +17,12 @@
 	- [ ] How to handle `num_params`?
 - [x] Refactor to remove magic numbers
 - [ ] As more utility/objective functions are added, consider refactoring to match demand/spread
-- [ ] Fix NN input shape
+- [x] Fix NN input shape
+- [ ] Refactor config, need to make it so that it's not referenced before it has a chance to be set up.
+- [ ] Double check for references to `components.informed` that are not in blocks where `globals.informed` has been checked
+- [x] Add allowed pairings to function components
+- [ ] Refactor `Experiment.trade()`
+	- [ ] Fix deque indexing (grabbing the best bid/ask is removing the order from the deque)
 
 
 ## Requirements for alpha
@@ -31,6 +36,7 @@
 	- [x] Need to redo how `AgentInfo` handles function parameters.
 	- [ ] Add new columns to module documentation
 	- [ ] Update documentation to add usage of experiment.py and agent_constructor.py
+- [ ] Neural Networks require historical data to be initialized, perhaps a simulation with just bayesian agents can be used to generate this data.
 - [ ] Rewrite test suite and begin debugging 
 
 ## High Level
