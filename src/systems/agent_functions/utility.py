@@ -3,6 +3,8 @@ from typing import List, Union
 
 import numpy as jnp
 
+from globals import globals
+
 
 ## Utility function for agents to determine how much they value gains relative to risk
 class Utility(ABC):
@@ -34,7 +36,7 @@ def calculate_utility(
     utilities = jnp.zeros((len(agents), len(returns[0])))
 
     for i in UTILITY_REGISTRY.keys():
-        same_util = jnp.where(agents[:, 2] == i)[0]
+        same_util = jnp.where(agents[:, globals.components.utility_function] == i)[0]
         utilities[same_util[:, None]] = UTILITY_REGISTRY[i](returns, risk_aversion)
 
     return utilities
@@ -53,4 +55,4 @@ def register_utility_function(utility_functions: Union[List[Utility], Utility]):
         UTILITY_REGISTRY[len(UTILITY_REGISTRY)] = utility_function
 
 
-UTILITY_REGISTRY = {1: Const_abs_risk_aversion}
+UTILITY_REGISTRY = {1: Const_abs_risk_aversion()}

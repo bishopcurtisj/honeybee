@@ -14,6 +14,20 @@ class Globals:
     trades: jnp.ndarray  # [quantity, price, difference from benchmark (mean/last)]
     informed: bool
     generation: int
+    repetition: int
+
+    def __getitem__(self, key):
+        """Allow dict-like access."""
+        if isinstance(key, str):
+            return getattr(self, key, None)
+        elif isinstance(key, int) and 0 <= key < len(self._columns):
+            return self._columns[key]
+        elif isinstance(key, list):
+            attributes = []
+            for k in key:
+                attributes.append(self.__getitem__(k))
+                return tuple(attributes)
+        raise KeyError(f"Invalid key: {key}")
 
 
 class Config:

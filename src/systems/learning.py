@@ -27,10 +27,14 @@ class ModelController:
         )
         bayesian = Bayesian()
         self.model_registry = {
-            "genetic_algorithm": {"func": genetic_algorithm, "id": 1},
-            "Bayesian": {"func": bayesian, "id": 2},
-            "neural_network": {"func": neural_network, "id": 3},
+            1: {"func": genetic_algorithm, "name": "genetic_algorithm"},
+            2: {"func": bayesian, "name": "Bayesian"},
+            3: {"func": neural_network, "name": "neural_network"},
         }
+
+    def save_models(self):
+        for model in self.model_registry.values():
+            model["func"].save()
 
     def register_models(self, models: Union[List[Model], Model]):
 
@@ -58,9 +62,10 @@ class ModelController:
 
     def learn(self) -> jnp.ndarray:
 
-        for model in self.model_registry.values():
+        for i in globals.learning_algorithm:
+            model = self.model_registry[i]
             model_agents = jnp.where(
-                globals.agents[:, globals.components.learning_algorithm] == model["id"]
+                globals.agents[:, globals.components.learning_algorithm] == i
             )[0]
             globals.agents[model_agents[:, None]] = model["func"](
                 globals.agents[model_agents], model["args"]

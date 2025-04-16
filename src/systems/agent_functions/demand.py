@@ -2,8 +2,9 @@ from abc import ABC, abstractmethod
 from typing import List, Union
 
 import numpy as jnp
-from jax.random import geometric
+from jax.scipy.stats import norm
 
+from globals import globals
 from systems.learning import model_controller
 from systems.models.neural_network import NeuralNetwork
 
@@ -12,7 +13,6 @@ from systems.models.neural_network import NeuralNetwork
 class Demand(ABC):
     name: str
 
-    @staticmethod
     @abstractmethod
     def __call__(*args, **kwargs) -> float: ...
 
@@ -23,7 +23,12 @@ class GS_linear(Demand):
     ## If uninformed signal == price
     @staticmethod
     def __call__(
-        price: float, coeffs: jnp.ndarray, signal, scaling_factor: float = None
+        price: float,
+        coeffs: jnp.ndarray,
+        signal,
+        scaling_factor: float = None,
+        *args,
+        **kwargs,
     ) -> float:
         return scaling_factor * (coeffs[0] + coeffs[1] * signal - price)
 
@@ -42,31 +47,39 @@ class BayesianDemand(Demand):
     name = "BayesianDemand"
 
     @staticmethod
-    def __call__(price: jnp.ndarray, bid: bool, params: jnp.ndarray, key=None) -> float:
-        prob = (price - params[:, 0]) / params[:, 1]
+    def __call__(
+        price: jnp.ndarray,
+        bid: bool,
+        params: jnp.ndarray,
+        key=None,
+        *args,
+        **kwargs,
+    ) -> float:
+        z_score = (price - params[:, 0]) / params[:, 1]
+        prob = norm.cdf(z_score)
 
         if bid:
-            return geometric(key, 1 - prob)
+            return jnp.random.geometric(prob)
         else:
-            return geometric(key, prob)
+            p = 1 - prob
+            return -jnp.random.geometric(p)
 
 
 class NeuralNetworkDemand(Demand):
 
     def __init__(self):
         self.agent_id = globals.components.agent_id
-        self.neural_network: NeuralNetwork = model_controller.model_registry[
-            "neural_network"
-        ]
+        self.neural_network: NeuralNetwork = model_controller.model_registry[3]["func"]
 
-    def __call__(self, agents: jnp.ndarray, prices: float, *args, **kwds):
+    def __call__(self, agents: jnp.ndarray, prices: jnp.ndarray, *args, **kwargs):
 
         demands = jnp.empty(len(agents))
 
         for i, agent in enumerate(agents):
             model_info = self.neural_network.models[agent[self.agent_id]]
-            model = self.neural_network._load_model(model_info["model_ref"])
-            demands[i] = model.predict(prices[i])
+            model = NeuralNetwork._load_model(model_info["model_ref"])
+            inputs = ([prices[i]],)
+            demands[i] = model.predict(inputs)
 
         return demands
 
@@ -85,8 +98,10 @@ def register_demand_function(demand_functions: Union[List[Demand], Demand]):
 
 
 def demand_factory():
+    gs_linear = GS_linear()
+    bayesian = BayesianDemand()
     neural_network_demand = NeuralNetworkDemand()
-    DEMAND_REGISTRY[3] = neural_network_demand
+    DEMAND_REGISTRY.update({1: gs_linear, 2: bayesian, 3: neural_network_demand})
 
 
-DEMAND_REGISTRY = {1: GS_linear, 2: BayesianDemand}
+DEMAND_REGISTRY = {}

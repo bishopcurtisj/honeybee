@@ -13,3 +13,6 @@ class Model(ABC):
     @abstractmethod
     def __call__(self, agents: jnp.ndarray, *args, **kwargs) -> jnp.ndarray:
         pass
+
+    def save(self):
+        pass

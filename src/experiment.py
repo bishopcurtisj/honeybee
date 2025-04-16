@@ -1,4 +1,5 @@
-import json
+import os
+import shutil
 from typing import List, Union
 
 import numpy as jnp
@@ -43,6 +44,13 @@ class Experiment:
         globals.agents = np.loadtxt(agents_file_path, delimiter=",", skiprows=1)
         globals.market = market
         globals.components = AgentInfo(self.headers)
+
+        functions = ["spread_function", "learning_algorithm"]
+
+        for function in functions:
+            globals.__setattr__(
+                function, np.unique(globals.agents[:, globals.components[function]])
+            )
 
         if "informed" in globals.components.keys():
             globals.agents[:, globals.components.signal] = jnp.where(
@@ -94,25 +102,14 @@ class Experiment:
             header=",".join(self.headers),
             comments="",
         )
+        if config.save_models:
+            model_controller.save_models()
+        elif os.path.exists("model_paths"):
+            shutil.rmtree("model_paths")
 
     def learn(self):
-        if globals.informed == False:
-            columns = jnp.array(
-                [globals.components.fitness] + globals.components.demand_fx_params
-            )
 
-        else:
-            columns = jnp.array(
-                [globals.components.fitness, globals.components.informed]
-                + globals.components.demand_fx_params
-            )
-
-        params = globals.agents[:, jnp.array(globals.components.learning_params)]
-        subset = globals.agents[:, columns]
-
-        subset = model_controller.learn(subset, params)
-
-        globals.agents[:, columns] = subset
+        model_controller.learn()
         globals.market.new_period()
 
         ## Update signal
@@ -126,13 +123,15 @@ class Experiment:
     ## Refactor to vectorize
     def trade(self):
         traders = jnp.where(globals.agents[:, globals.components.agent_type] == 0)[0]
-        self.get_agent_spread()
-        agent_ids = traders[:, globals.components.id]
+        agent_ids = globals.agents[traders][:, globals.components.agent_id]
         total_agent_trades = jnp.zeros((len(globals.agents), config.repetitions, 2))
         trades = jnp.empty((0, 3))
 
         for repetition in range(config.repetitions):
-            trade_order = jnp.random.permutation(agent_ids)
+            globals.repetition = repetition
+            self.get_agent_spread()
+            trade_order = jnp.random.permutation(agent_ids).astype(int)
+            # trade_order = trade_order.astype(int)
             for agent_id in trade_order:
                 globals.market.order_book.add_order(
                     agent_id,
@@ -162,38 +161,15 @@ class Experiment:
 
     def calculate_agent_fitness(self, trades: jnp.ndarray):
         traders = jnp.where(globals.agents[:, globals.components.agent_type] == 0)[0]
-        if globals.informed == False:
-            columns = np.array(
-                [
-                    globals.components.fitness,
-                    globals.components.objective_function,
-                    globals.components.utility_function,
-                    globals.components.demand,
-                    globals.components.demand_function,
-                ]
-                + globals.components["demand_function"]["parameter_idxs"]
-            )
-        else:
-            columns = np.array(
-                [
-                    globals.components.fitness,
-                    globals.components.objective_function,
-                    globals.components.utility_function,
-                    globals.components.informed,
-                    globals.components.signal,
-                    globals.components.demand,
-                    globals.components.demand_function,
-                ]
-                + globals.components.demand_fx_params
-            )
-        subset = globals.agents[traders][:, columns]  # Corrected indexing
+
+        subset = globals.agents[traders]  # Corrected indexing
 
         subset = calculate_fitness(
             subset,
             trades,
             globals.agents[traders][:, globals.components.risk_aversion],
         )
-        globals.agents[traders[:, None], columns] = subset
+        globals.agents[traders] = subset
 
     def get_agent_spread(self):
         """
@@ -202,46 +178,17 @@ class Experiment:
         traders = jnp.where(globals.agents[:, globals.components.agent_type] == 0)[
             0
         ]  # Extract the first element of the tuple
-        if globals.components.informed == None:
-            # Correctly concatenate lists before converting to jnp.array
-            columns = jnp.array(
-                [
-                    globals.components.bid,
-                    globals.components.ask,
-                    globals.components.bid_quantity,
-                    globals.components.ask_quantity,
-                    globals.components.demand_function,
-                    globals.components.confidence,
-                ]
-                + globals.components.demand_fx_params
-            )
-        else:
-            columns = jnp.array(
-                [
-                    globals.components.informed,
-                    globals.components.signal,
-                    globals.components.bid,
-                    globals.components.ask,
-                    globals.components.bid_quantity,
-                    globals.components.ask_quantity,
-                    globals.components.demand_function,
-                    globals.components.confidence,
-                ]
-                + globals.components.demand_fx_params
-            )
-        # Correct the way traders and columns are used
-        subset = globals.agents[traders][:, columns]  # Corrected indexing
 
-        for i in SPREAD_REGISTRY.keys():
+        subset = globals.agents[traders]  # Corrected indexing
+
+        for i in globals.spread_function:
             same_spread = jnp.where(
                 globals.agents[:, globals.components.spread_function] == i
             )
-            subset[same_spread[:, None], columns] = SPREAD_REGISTRY[i](
-                subset[same_spread][:, columns]
-            )
+            subset[same_spread] = SPREAD_REGISTRY[i](subset[same_spread])
 
         # Store updated values back in agents array
-        globals.agents[traders[:, None], columns] = subset
+        globals.agents[traders] = subset
 
     def register_demand_function(self, demand_functions: Union[List[Demand], Demand]):
         register_demand(demand_functions)
