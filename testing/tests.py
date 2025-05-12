@@ -20,12 +20,23 @@ class TestExperiment(unittest.TestCase):
     def setUp(self):
         config.from_json("testing/test_config.json")
 
-    def test_save_models(self):
+    # def test_save_models(self):
+    #     config.save_models = True
+    #     market = GSOrderMarket()
+    #     experiment = Experiment(
+    #         market=market,
+    #         agents_file_path="testing/test_bayesians.csv",
+    #     )
+    #     results = experiment.run(2, 100)
+
+    #     self.assertIsInstance(results, jnp.ndarray)
+
+    def test_bayesians_RL(self):
         config.save_models = True
         market = GSOrderMarket()
         experiment = Experiment(
             market=market,
-            agents_file_path="testing/test_bayesians.csv",
+            agents_file_path="testing/test_bayesians_RL.csv",
         )
         results = experiment.run(2, 100)
 

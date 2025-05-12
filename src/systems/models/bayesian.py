@@ -44,7 +44,7 @@ class Bayesian(Model):
         )
         agents[informed_agents] = self.update_priors(
             agents[informed_agents],
-            globals.trades,
+            jnp.array([globals.trades] * len(informed_agents)),
         )
         agents[uninformed_agents] = self.update_priors(
             agents[uninformed_agents],
@@ -87,9 +87,22 @@ class Bayesian(Model):
 
             sigma_n_sq = 1 / (1 / sigma**2 + total_quantity / tau**2)
             mu_n = sigma_n_sq * (mu / sigma**2 + weighted_sum / tau**2)
+            # sigma_n = jnp.sqrt(sigma_n_sq)
             return jnp.array([mu_n, jnp.sqrt(sigma_n_sq), tau])
 
-        updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
+        updated_params = jnp.stack(
+            [
+                update_agent(mu_prior[i], sigma_prior[i], tau[i], trades[i])
+                for i in range(len(agents))
+            ],
+            axis=0,
+        )
+        agents[:, [self.mu_prior, self.sigma_prior, self.tau]] = updated_params
+        ## Jax implementation
+        # updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
 
-        agents = agents.at[:, globals.components.demand_fx_params].set(updated_params)
+        # agents = agents.at[:, [self.mu_prior, self.sigma_prior, self.tau]].set(
+        #     updated_params
+        # )
+
         return agents
