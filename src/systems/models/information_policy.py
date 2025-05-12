@@ -1,5 +1,5 @@
 from abc import ABC, ABCMeta, abstractmethod
-from functools import singledispatch
+from functools import singledispatchmethod
 from typing import List, Union
 
 import numpy as jnp
@@ -83,6 +83,20 @@ class ReinforcementLearning(InformationDecisionPolicy):
         return agent
 
 
+class RL_Registry:
+    def __init__(self, agents: jnp.ndarray):
+        self.agent_id = globals.components.agent_id
+        self.rl_policies = {
+            agent[self.agent_id]: ReinforcementLearning(agent=agent) for agent in agents
+        }
+
+    def __call__(self, agents: jnp.ndarray):
+
+        agents = jnp.array(
+            [self.rl_policies[agent[self.agent_id]](agent) for agent in agents]
+        )
+
+
 class BayesianInfo(InformationDecisionPolicy):
     name: str = "BayesianInfo"
 
@@ -103,17 +117,18 @@ class BayesianInfo(InformationDecisionPolicy):
         expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]] = (
             (globals.generation - 1)
             * expected_info_return[jnp.where(agents[:, self.informed] == 1)[0]]
-            + agents[jnp.where(agents[:, self.informed] == 1)[0]][self.fitness]
+            + agents[jnp.where(agents[:, self.informed] == 1)[0]][:, self.fitness]
         ) / globals.generation
         expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]] = (
             (globals.generation - 1)
             * expected_uninf_return[jnp.where(agents[:, self.informed] == 0)[0]]
-            + agents[jnp.where(agents[:, self.informed] == 0)[0]][self.fitness]
+            + agents[jnp.where(agents[:, self.informed] == 0)[0]][:, self.fitness]
         ) / globals.generation
 
         agents[:, self.info_return] = expected_info_return
         agents[:, self.uninf_return] = expected_uninf_return
         p = expected_info_return / (expected_info_return + expected_uninf_return)
+        p = jnp.nan_to_num(p, nan=0.5)
         agents[:, self.informed] = jnp.random.binomial(1, p, len(agents))
         return agents
 
@@ -160,15 +175,18 @@ class FixedInformation(InformationDecisionPolicy):
 
     name: str = "FixedInformation"
 
-    @singledispatch
+    @singledispatchmethod
+    @staticmethod
     def __call__(agents, *args, **kwargs):
         raise TypeError(f"Unsupported type {type(agents)}")
 
     @__call__.register
+    @staticmethod
     def _(agents: None = None, *args, **kwargs):
         return FixedInformation
 
     @__call__.register
+    @staticmethod
     def _(agents: jnp.ndarray, *args, **kwargs):
         return agents
 
@@ -194,11 +212,19 @@ def info_factory():
     fixed = FixedInformation()
     bayesian = BayesianInfo()
     thompson = ThompsonSampling()
-    INFORMATION_POLICY_REGISTRY[0] = fixed
-    INFORMATION_POLICY_REGISTRY[1] = bayesian
-    INFORMATION_POLICY_REGISTRY[3] = thompson
+    rl_registry = RL_Registry(
+        globals.agents[
+            jnp.where(globals.agents[:, globals.components.information_policy] == 2)[0]
+        ]
+    )
+
+    INFORMATION_POLICY_REGISTRY.update(
+        {
+            0: fixed,
+            1: bayesian,
+            2: rl_registry,
+        }
+    )  # 3:thompson})
 
 
-INFORMATION_POLICY_REGISTRY = {
-    2: ReinforcementLearning,
-}
+INFORMATION_POLICY_REGISTRY = {}

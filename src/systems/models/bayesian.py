@@ -18,12 +18,12 @@ class Bayesian(Model):
     def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
 
         if globals.informed:
-            return Bayesian._informed(agents)
+            return self._informed(agents)
         else:
-            return Bayesian._uninformed(agents)
+            return self._uninformed(agents)
 
     def _uninformed(self, agents: jnp.ndarray) -> jnp.ndarray:
-        return Bayesian.update_priors(agents, globals.trades)
+        return self.update_priors(agents, globals.trades)
 
     def _informed(self, agents: jnp.ndarray) -> jnp.ndarray:
 
@@ -32,17 +32,19 @@ class Bayesian(Model):
 
         samples = jnp.array(
             [
-                jnp.random.choice(
-                    globals.trades,
-                    size=(len(globals.trades) * config.uninformed_base_ratio),
-                    replace=False,
-                )
-                for _ in len(uninformed_agents)
+                globals.trades[
+                    jnp.random.choice(
+                        range(len(globals.trades)),
+                        size=(len(globals.trades) * config.uninformed_base_ratio),
+                        replace=False,
+                    )
+                ]
+                for _ in range(len(uninformed_agents))
             ]
         )
         agents[informed_agents] = self.update_priors(
             agents[informed_agents],
-            globals.trades,
+            jnp.array([globals.trades] * len(informed_agents)),
         )
         agents[uninformed_agents] = self.update_priors(
             agents[uninformed_agents],
@@ -85,9 +87,22 @@ class Bayesian(Model):
 
             sigma_n_sq = 1 / (1 / sigma**2 + total_quantity / tau**2)
             mu_n = sigma_n_sq * (mu / sigma**2 + weighted_sum / tau**2)
+            # sigma_n = jnp.sqrt(sigma_n_sq)
             return jnp.array([mu_n, jnp.sqrt(sigma_n_sq), tau])
 
-        updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
+        updated_params = jnp.stack(
+            [
+                update_agent(mu_prior[i], sigma_prior[i], tau[i], trades[i])
+                for i in range(len(agents))
+            ],
+            axis=0,
+        )
+        agents[:, [self.mu_prior, self.sigma_prior, self.tau]] = updated_params
+        ## Jax implementation
+        # updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
 
-        agents = agents.at[:, globals.components.demand_fx_params].set(updated_params)
+        # agents = agents.at[:, [self.mu_prior, self.sigma_prior, self.tau]].set(
+        #     updated_params
+        # )
+
         return agents

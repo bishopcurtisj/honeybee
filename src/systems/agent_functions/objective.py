@@ -55,8 +55,8 @@ def calculate_fitness(
         same_objective = jnp.where(
             agents[:, globals.components.objective_function] == i
         )
-        agents[same_objective[:, None], globals.components.fitness] = (
-            OBJECTIVE_REGISTRY[i](utilities, risk_aversion)
+        agents[same_objective, globals.components.fitness] = OBJECTIVE_REGISTRY[i](
+            utilities, risk_aversion
         )
 
     return agents
@@ -71,11 +71,14 @@ def calculate_returns(agents: jnp.ndarray, trades: jnp.ndarray) -> jnp.ndarray:
     trades should have the following shape
     (Agent, repetition, [quantity, total spendings])
     """
-    returns = (
-        trades[:, :, 0] * globals.market[config.benchmark_price]
-        - trades[:, :, 1]
-        - globals.market.cost_of_info * agents[:, globals.components.informed]
-    )
+    returns = trades[:, :, 0] * globals.market[config.benchmark_price] - trades[:, :, 1]
+
+    if globals.informed:
+        info_spending = jnp.array(
+            [globals.market.cost_of_info * agents[:, globals.components.informed]] * 100
+        )
+        return returns - info_spending.T
+
     return returns
 
 
