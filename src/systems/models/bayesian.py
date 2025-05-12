@@ -18,12 +18,12 @@ class Bayesian(Model):
     def __call__(self, agents: jnp.ndarray) -> jnp.ndarray:
 
         if globals.informed:
-            return Bayesian._informed(agents)
+            return self._informed(agents)
         else:
-            return Bayesian._uninformed(agents)
+            return self._uninformed(agents)
 
     def _uninformed(self, agents: jnp.ndarray) -> jnp.ndarray:
-        return Bayesian.update_priors(agents, globals.trades)
+        return self.update_priors(agents, globals.trades)
 
     def _informed(self, agents: jnp.ndarray) -> jnp.ndarray:
 
@@ -32,12 +32,14 @@ class Bayesian(Model):
 
         samples = jnp.array(
             [
-                jnp.random.choice(
-                    globals.trades,
-                    size=(len(globals.trades) * config.uninformed_base_ratio),
-                    replace=False,
-                )
-                for _ in len(uninformed_agents)
+                globals.trades[
+                    jnp.random.choice(
+                        range(len(globals.trades)),
+                        size=(len(globals.trades) * config.uninformed_base_ratio),
+                        replace=False,
+                    )
+                ]
+                for _ in range(len(uninformed_agents))
             ]
         )
         agents[informed_agents] = self.update_priors(

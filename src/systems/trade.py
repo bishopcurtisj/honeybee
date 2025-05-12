@@ -84,6 +84,12 @@ class OrderBook:
                         (-self.buy_orders[best_bid][0].quantity, best_bid)
                     )
                     self.buy_orders[best_bid].popleft()
+                    if len(self.buy_orders[best_bid]) == 0:
+                        del self.buy_orders[best_bid]
+                        try:
+                            best_bid = next(iter(self.buy_orders))
+                        except StopIteration:
+                            best_bid = -1
                 else:
                     self.buy_orders[best_bid][0].quantity += order.quantity
                     self.agent_trades[self.buy_orders[best_bid][0].trader_id].append(
@@ -99,7 +105,7 @@ class OrderBook:
             # buy order
             while order.quantity > 0 and order.price >= best_ask:
                 if order.quantity >= self.sell_orders[best_ask][0].quantity:
-                    order.quantity -= self.sell_orders[best_ask][0].quantity
+                    order.quantity += self.sell_orders[best_ask][0].quantity
                     self.agent_trades[self.sell_orders[best_ask][0].trader_id].append(
                         (-self.sell_orders[best_ask][0].quantity, best_ask)
                     )
@@ -107,6 +113,12 @@ class OrderBook:
                         (self.sell_orders[best_ask][0].quantity, best_ask)
                     )
                     self.sell_orders[best_ask].popleft()
+                    if len(self.sell_orders[best_ask]) == 0:
+                        del self.sell_orders[best_ask]
+                        try:
+                            best_ask = next(iter(self.sell_orders))
+                        except StopIteration:
+                            best_ask = jnp.inf
                 else:
                     self.sell_orders[best_ask][0].quantity -= order.quantity
                     self.agent_trades[self.sell_orders[best_ask][0].trader_id].append(
@@ -145,6 +157,6 @@ class OrderBook:
         returns = (trades[:, 1] - mean_price) * (
             -1 * trades[:, 0] / jnp.abs(trades[:, 0])
         )
-        trades = jnp.hstack((trades, returns))
+        trades = jnp.hstack((trades, returns[:, jnp.newaxis]))
 
         return trades

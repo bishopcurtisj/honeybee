@@ -57,7 +57,6 @@ class ModelController:
                     ],
                 ),
                 "id": len(self.model_registry),
-                "args": model.args,
             }
 
     def learn(self) -> jnp.ndarray:
@@ -68,7 +67,7 @@ class ModelController:
                 globals.agents[:, globals.components.learning_algorithm] == i
             )[0]
             globals.agents[model_agents[:, None]] = model["func"](
-                globals.agents[model_agents], model["args"]
+                globals.agents[model_agents]
             )
 
 

@@ -146,8 +146,8 @@ class Experiment:
             agent_trades = globals.market.order_book.get_agent_trades()
             trades = jnp.vstack((trades, globals.market.order_book.get_trades()))
 
-            for agent_id in agent_ids:
-                if agent_id in agent_trades.keys():
+            for agent_id in agent_ids.astype(int):
+                if agent_id in agent_trades.keys() and len(agent_trades[agent_id]) > 0:
                     total_agent_trades[agent_id, repetition] = jnp.array(
                         agent_trades[agent_id][:, 0].sum(),
                         np.sum(

@@ -20,7 +20,7 @@ class Const_abs_risk_aversion(Utility):
 
     @staticmethod
     def __call__(returns: jnp.ndarray, risk_aversion: jnp.ndarray) -> jnp.ndarray:
-        return -jnp.exp(-risk_aversion * returns)
+        return -jnp.exp(-risk_aversion[:, jnp.newaxis] * returns)
 
 
 def calculate_utility(
@@ -37,7 +37,7 @@ def calculate_utility(
 
     for i in UTILITY_REGISTRY.keys():
         same_util = jnp.where(agents[:, globals.components.utility_function] == i)[0]
-        utilities[same_util[:, None]] = UTILITY_REGISTRY[i](returns, risk_aversion)
+        utilities[same_util] = UTILITY_REGISTRY[i](returns, risk_aversion)
 
     return utilities
 
