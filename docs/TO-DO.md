@@ -42,6 +42,8 @@
 ## High Level
 - [ ] Vectorize as many loops as possible
 	- [ ] `vmap`: need to learn more
+- [ ] Need to set up handling for when there are no agents who use a learning/info function
+- [ ] Need to set up results tracking and reporting, right now the trades are discarded.
 - [x] Refactor to split functions into their own modules, i.e. demand.py, objective.py, spread.py for now it's fine, but as more options are added it'll get messy. It'll also be easier for other people to navigate.
 - [ ] Update Jax implementation
 - [x] Revisit Experiment.trade() to decide how to induce variance across repetitions without dividend variance. There definitely will be stochasticity, but I want to formalize and understand it better.
@@ -73,9 +75,12 @@
 	- [x] Track and append trades from each repetition
 - [x] Calculate utility for each trade.
 	- [x] Decide how to calculate profit from each trade, what is the "true" value that they are being judged on? Average price or Last price?
-- [x] Revisit RL information policy
+- [x] Fix RL information policy so that it correctly handles being handed multiple agents. Copy NN implementation.
+	- [ ] Parallelize
+	- [x] Uncomment it from registry once done.
 - [ ] Add ability for Neural Network to set spread
 	- [ ] For now just using a dummy approach, will refactor once I decide how I want to approach this.
+
 
 ### Bayesians
 
@@ -91,3 +96,4 @@
 - [x] Need to implement updating function
 - [x] Implement logic for when multiple agents are passed to BayesianDemand
 - [ ] Add tau calculation
+- [ ] convert `_informed` to one function call by refactoring agent trades construction.
