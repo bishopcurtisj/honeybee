@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-import numpy as jnp
+import jax.numpy as jnp
 
 
 class Model(ABC):

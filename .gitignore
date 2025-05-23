@@ -11,3 +11,4 @@ src/__pycache__/
 src/components/__pycache__/
 src/entities/__pycache__/
 src/systems/__pycache__/
+julia/

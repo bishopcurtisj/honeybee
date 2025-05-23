@@ -2,9 +2,9 @@ import os
 import shutil
 from typing import List, Union
 
-import numpy as jnp
 import numpy as np
 
+import jax.numpy as jnp
 from entities.agent import AgentInfo
 from entities.market import Market
 from globals import config, globals

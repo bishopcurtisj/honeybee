@@ -1,9 +1,9 @@
 from collections import deque
 from itertools import chain
 
-import numpy as jnp
 from sortedcontainers import SortedDict
 
+import jax.numpy as jnp
 from globals import globals
 
 

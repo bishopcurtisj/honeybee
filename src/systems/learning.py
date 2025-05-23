@@ -1,7 +1,6 @@
 from typing import List, Union
 
-import numpy as jnp
-
+import jax.numpy as jnp
 from globals import globals
 from systems.models.bayesian import Bayesian
 from systems.models.genetic_algorithm import GeneticAlgorithm

@@ -1,6 +1,6 @@
-import numpy as jnp
 import numpy.random as random
 
+import jax.numpy as jnp
 from globals import config, globals
 from systems.models.model import Model
 

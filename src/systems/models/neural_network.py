@@ -2,9 +2,9 @@ import gc
 import os
 from functools import singledispatch
 
-import numpy as jnp
 import tensorflow as tf
 
+import jax.numpy as jnp
 from globals import config, globals
 from systems.models.information_policy import INFORMATION_POLICY_REGISTRY
 from systems.models.loss import LOSS_REGISTRY

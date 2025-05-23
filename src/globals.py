@@ -1,8 +1,7 @@
 import json
 from typing import List
 
-import numpy as jnp
-
+import jax.numpy as jnp
 from entities.agent import AgentInfo
 
 

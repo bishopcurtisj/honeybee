@@ -2,10 +2,10 @@ from abc import ABC, ABCMeta, abstractmethod
 from functools import singledispatchmethod
 from typing import List, Union
 
-import numpy as jnp
 import numpy as np
 import tensorflow as tf
 
+import jax.numpy as jnp
 from globals import config, globals
 
 

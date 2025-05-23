@@ -1,10 +1,9 @@
 from abc import ABC, abstractmethod
 from typing import List, Union
 
-import numpy as jnp
-from jax.scipy.stats import norm
-
+import jax.numpy as jnp
 from globals import globals
+from jax.scipy.stats import norm
 from systems.learning import model_controller
 from systems.models.neural_network import NeuralNetwork
 

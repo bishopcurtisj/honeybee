@@ -1,8 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import List, Union
 
-import numpy as jnp
-
+import jax.numpy as jnp
 from globals import config, globals
 from systems.agent_functions.utility import calculate_utility
 

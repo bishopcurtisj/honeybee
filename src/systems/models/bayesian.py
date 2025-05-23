@@ -1,4 +1,4 @@
-import numpy as jnp
+import jax.numpy as jnp
 from jax import vmap
 
 from globals import config, globals
@@ -90,19 +90,11 @@ class Bayesian(Model):
             # sigma_n = jnp.sqrt(sigma_n_sq)
             return jnp.array([mu_n, jnp.sqrt(sigma_n_sq), tau])
 
-        updated_params = jnp.stack(
-            [
-                update_agent(mu_prior[i], sigma_prior[i], tau[i], trades[i])
-                for i in range(len(agents))
-            ],
-            axis=0,
-        )
-        agents[:, [self.mu_prior, self.sigma_prior, self.tau]] = updated_params
-        ## Jax implementation
-        # updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
+        # Jax implementation
+        updated_params = vmap(update_agent)(mu_prior, sigma_prior, tau, trades)
 
-        # agents = agents.at[:, [self.mu_prior, self.sigma_prior, self.tau]].set(
-        #     updated_params
-        # )
+        agents = agents.at[:, [self.mu_prior, self.sigma_prior, self.tau]].set(
+            updated_params
+        )
 
         return agents

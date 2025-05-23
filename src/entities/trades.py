@@ -1,5 +1,4 @@
-import numpy as jnp
-
+import jax.numpy as jnp
 from entities.agent import UTILITY_REGISTRY
 
 

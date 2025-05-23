@@ -3,10 +3,10 @@ src/entities/__init__.py
 src/entities/agent.py
 src/entities/market.py
 src/entities/trades.py
-src/honeybee_numpy.egg-info/PKG-INFO
-src/honeybee_numpy.egg-info/SOURCES.txt
-src/honeybee_numpy.egg-info/dependency_links.txt
-src/honeybee_numpy.egg-info/top_level.txt
+src/honeybee.egg-info/PKG-INFO
+src/honeybee.egg-info/SOURCES.txt
+src/honeybee.egg-info/dependency_links.txt
+src/honeybee.egg-info/top_level.txt
 src/systems/__init__.py
 src/systems/learning.py
 src/systems/trade.py
